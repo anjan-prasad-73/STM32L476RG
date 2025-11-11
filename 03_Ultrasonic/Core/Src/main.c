@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 
-
 UART_HandleTypeDef huart2;
 TIM_HandleTypeDef htim2;
 
