@@ -1,0 +1,20 @@
+12:11:35 **** Incremental Build of configuration Debug for project Utra ****
+make -j8 all 
+arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -Dstm32l4xx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/STM32L476RG/Utra/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main.o"
+arm-none-eabi-gcc "../Src/stm32l4xx_gpio_driver.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -Dstm32l4xx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/STM32L476RG/Utra/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/stm32l4xx_gpio_driver.d" -MT"Src/stm32l4xx_gpio_driver.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/stm32l4xx_gpio_driver.o"
+arm-none-eabi-gcc "../Src/syscalls.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -Dstm32l4xx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/STM32L476RG/Utra/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/syscalls.d" -MT"Src/syscalls.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/syscalls.o"
+arm-none-eabi-gcc "../Src/sysmem.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -Dstm32l4xx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/STM32L476RG/Utra/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/sysmem.d" -MT"Src/sysmem.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/sysmem.o"
+arm-none-eabi-gcc -o "Utra.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\Utra\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Utra.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Utra.elf
+ 
+arm-none-eabi-size  Utra.elf 
+arm-none-eabi-objdump -h -S Utra.elf  > "Utra.list"
+   text	   data	    bss	    dec	    hex	filename
+   2460	      0	   1568	   4028	    fbc	Utra.elf
+Finished building: default.size.stdout
+ 
+Finished building: Utra.list
+ 
+
+12:11:42 Build Finished. 0 errors, 0 warnings. (took 6s.712ms)
+

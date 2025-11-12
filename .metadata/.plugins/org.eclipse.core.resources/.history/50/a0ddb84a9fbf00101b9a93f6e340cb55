@@ -1,0 +1,147 @@
+#include "stm32l4xx_hal.h"
+#include <string.h>
+
+// ------------ Global Variables ------------
+I2C_HandleTypeDef hi2c1;   // Master
+I2C_HandleTypeDef hi2c2;   // Slave
+SPI_HandleTypeDef hspi2;
+UART_HandleTypeDef huart2;
+
+
+uint8_t tx_buf[] = "HELLO";
+uint8_t rx_buf[6];
+
+/* ---- Prototypes ---- */
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_I2C2_Init(void);
+void Error_Handler(void);
+
+int main(void)
+{
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    MX_I2C1_Init();
+    MX_I2C2_Init();
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);  // LED ON start
+
+    /* Start slave receive first */
+    if (HAL_I2C_Slave_Receive(&hi2c2, rx_buf, sizeof(tx_buf), HAL_MAX_DELAY) != HAL_OK)
+        Error_Handler();
+
+    /* Master send after small delay */
+    HAL_Delay(50);
+    if (HAL_I2C_Master_Transmit(&hi2c1, 0x52 << 1, tx_buf, sizeof(tx_buf), HAL_MAX_DELAY) != HAL_OK)
+        Error_Handler();
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET); // LED OFF when done
+
+    while (1)
+    {
+        HAL_Delay(1000);
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // blink if transfer OK
+    }
+}
+
+/* ---- I2C1 master ---- */
+static void MX_I2C1_Init(void)
+{
+    __HAL_RCC_I2C1_CLK_ENABLE();
+
+    hi2c1.Instance = I2C1;
+    hi2c1.Init.Timing = 0x00707CBB;        // 100 kHz
+    hi2c1.Init.OwnAddress1 = 0x00;
+    hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+    hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    hi2c1.Init.OwnAddress2 = 0;
+    hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+    hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+    hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+    if (HAL_I2C_Init(&hi2c1) != HAL_OK) Error_Handler();
+}
+
+/* ---- I2C2 slave ---- */
+static void MX_I2C2_Init(void)
+{
+    __HAL_RCC_I2C2_CLK_ENABLE();
+
+    hi2c2.Instance = I2C2;
+    hi2c2.Init.Timing = 0x00707CBB;        // 100 kHz
+    hi2c2.Init.OwnAddress1 = 0x52;
+    hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+    hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    hi2c2.Init.OwnAddress2 = 0;
+    hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+    hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+    hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+    if (HAL_I2C_Init(&hi2c2) != HAL_OK) Error_Handler();
+}
+
+/* ---- GPIO ---- */
+static void MX_GPIO_Init(void)
+{
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    GPIO_InitTypeDef g = {0};
+
+    /* I2C1 PB6,PB7  AF4  */
+    g.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+    g.Mode = GPIO_MODE_AF_OD;
+    g.Pull = GPIO_PULLUP;
+    g.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    g.Alternate = GPIO_AF4_I2C1;
+    HAL_GPIO_Init(GPIOB, &g);
+
+    /* I2C2 PB10,PB11  AF4 */
+    g.Pin = GPIO_PIN_10 | GPIO_PIN_11;
+    g.Alternate = GPIO_AF4_I2C2;
+    HAL_GPIO_Init(GPIOB, &g);
+
+    /* LED PA5 */
+    g.Pin = GPIO_PIN_5;
+    g.Mode = GPIO_MODE_OUTPUT_PP;
+    g.Pull = GPIO_NOPULL;
+    g.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &g);
+}
+
+/* ---- Clock ---- */
+void SystemClock_Config(void)
+{
+    RCC_OscInitTypeDef osc = {0};
+    RCC_ClkInitTypeDef clk = {0};
+
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    osc.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+    osc.MSIState = RCC_MSI_ON;
+    osc.MSIClockRange = RCC_MSIRANGE_6;
+    osc.PLL.PLLState = RCC_PLL_ON;
+    osc.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+    osc.PLL.PLLM = 1;
+    osc.PLL.PLLN = 40;
+    osc.PLL.PLLR = 2;
+    osc.PLL.PLLQ = 4;
+    osc.PLL.PLLP = 7;
+    if (HAL_RCC_OscConfig(&osc) != HAL_OK) Error_Handler();
+
+    clk.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
+                    RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    clk.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    clk.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    clk.APB1CLKDivider = RCC_HCLK_DIV1;
+    clk.APB2CLKDivider = RCC_HCLK_DIV1;
+    if (HAL_RCC_ClockConfig(&clk, FLASH_LATENCY_4) != HAL_OK) Error_Handler();
+}
+
+void Error_Handler(void)
+{
+    while (1)
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        HAL_Delay(200);
+    }
+}

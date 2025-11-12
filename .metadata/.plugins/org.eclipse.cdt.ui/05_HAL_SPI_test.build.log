@@ -1,0 +1,10 @@
+14:44:42 **** Incremental Build of configuration Debug for project 05_HAL_SPI_test ****
+make -j8 all 
+arm-none-eabi-size  05_HAL_SPI_test.elf 
+   text	   data	    bss	    dec	    hex	filename
+  13024	     12	   1804	  14840	   39f8	05_HAL_SPI_test.elf
+Finished building: default.size.stdout
+ 
+
+14:44:44 Build Finished. 0 errors, 0 warnings. (took 1s.542ms)
+

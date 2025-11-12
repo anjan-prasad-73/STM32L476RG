@@ -1,0 +1,10 @@
+12:52:25 **** Incremental Build of configuration Debug for project 02_OnboardUserButton ****
+make -j8 all 
+arm-none-eabi-size  02_OnboardUserButton.elf 
+   text	   data	    bss	    dec	    hex	filename
+  12548	     12	   1708	  14268	   37bc	02_OnboardUserButton.elf
+Finished building: default.size.stdout
+ 
+
+12:52:27 Build Finished. 0 errors, 0 warnings. (took 1s.329ms)
+

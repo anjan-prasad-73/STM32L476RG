@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;06_HAL_I2C_test/05_HAL_SPI_test.ioc&apos; to &apos;06_HAL_I2C_test.ioc&apos;" description="Rename resource &apos;05_HAL_SPI_test.ioc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="05_HAL_SPI_test.ioc" name="06_HAL_I2C_test.ioc" stamp="1762852525531" updateReferences="true"/>
+</session>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;05_HAL_SPI_test/02_OnboardUserButton.ioc&apos; to &apos;05_HAL_SPI_test.ioc&apos;" description="Rename resource &apos;02_OnboardUserButton.ioc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="02_OnboardUserButton.ioc" name="05_HAL_SPI_test.ioc" stamp="1762852046309" updateReferences="true"/>
+</session>

@@ -1,0 +1,210 @@
+#include "stm32l4xx_hal.h"
+#include <string.h>
+
+// ---- Global Variables ----
+I2C_HandleTypeDef hi2c1;  // Master
+I2C_HandleTypeDef hi2c2;  // Slave
+
+uint8_t tx_data[5] = {'A', 'N', 'J', 'A', 'N'};
+uint8_t rx_data[5];
+volatile uint8_t i2c_transfer_done = 0;
+
+// ---- Function Prototypes ----
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_I2C2_Init(void);
+void Error_Handler(void);
+
+// ---- Main Function ----
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_I2C1_Init();
+  MX_I2C2_Init();
+
+  // Blink LED once to indicate start
+  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+  HAL_Delay(200);
+  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+
+  // Start Slave reception interrupt
+  HAL_I2C_Slave_Receive_IT(&hi2c2, rx_data, sizeof(rx_data));
+
+  // Start Master transmission interrupt
+  HAL_I2C_Master_Transmit_IT(&hi2c1, (0x52 << 1), tx_data, sizeof(tx_data));
+
+  while (1)
+  {
+    if (i2c_transfer_done)
+    {
+      i2c_transfer_done = 0;
+
+      // Toggle LED every time transfer completes
+      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+      HAL_Delay(1000);
+
+      // Restart communication
+      HAL_I2C_Slave_Receive_IT(&hi2c2, rx_data, sizeof(rx_data));
+      HAL_I2C_Master_Transmit_IT(&hi2c1, (0x52 << 1), tx_data, sizeof(tx_data));
+    }
+  }
+}
+
+// ---- I2C1 Initialization (Master) ----
+static void MX_I2C1_Init(void)
+{
+  __HAL_RCC_I2C1_CLK_ENABLE();
+
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.Timing = 0x00707CBB; // 100kHz
+  hi2c1.Init.OwnAddress1 = 0x00;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0x00;
+  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+    Error_Handler();
+
+  HAL_NVIC_SetPriority(I2C1_EV_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
+  HAL_NVIC_SetPriority(I2C1_ER_IRQn, 1, 1);
+  HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
+}
+
+// ---- I2C2 Initialization (Slave) ----
+static void MX_I2C2_Init(void)
+{
+  __HAL_RCC_I2C2_CLK_ENABLE();
+
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.Timing = 0x00707CBB; // 100kHz
+  hi2c2.Init.OwnAddress1 = 0x52;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0x00;
+  hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+    Error_Handler();
+
+  HAL_NVIC_SetPriority(I2C2_EV_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(I2C2_EV_IRQn);
+  HAL_NVIC_SetPriority(I2C2_ER_IRQn, 1, 1);
+  HAL_NVIC_EnableIRQ(I2C2_ER_IRQn);
+}
+
+// ---- GPIO Initialization ----
+static void MX_GPIO_Init(void)
+{
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  // I2C1: PB6=SCL, PB7=SDA
+  GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  // I2C2: PB10=SCL, PB11=SDA
+  GPIO_InitStruct.Pin = GPIO_PIN_10 | GPIO_PIN_11;
+  GPIO_InitStruct.Alternate = GPIO_AF4_I2C2;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  // LED: PA5
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
+// ---- System Clock Configuration ----
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+  RCC_OscInitStruct.PLL.PLLM = 1;
+  RCC_OscInitStruct.PLL.PLLN = 40;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLP = 7;
+
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    Error_Handler();
+
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+                              | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+    Error_Handler();
+}
+
+// ---- I2C Callbacks ----
+void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+  if (hi2c->Instance == I2C1)
+    i2c_transfer_done = 1;
+}
+
+void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+  if (hi2c->Instance == I2C2)
+    i2c_transfer_done = 1;
+}
+
+void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
+{
+  Error_Handler();
+}
+
+// ---- I2C IRQ Handlers ----
+void I2C1_EV_IRQHandler(void)
+{
+  HAL_I2C_EV_IRQHandler(&hi2c1);
+}
+void I2C1_ER_IRQHandler(void)
+{
+  HAL_I2C_ER_IRQHandler(&hi2c1);
+}
+void I2C2_EV_IRQHandler(void)
+{
+  HAL_I2C_EV_IRQHandler(&hi2c2);
+}
+void I2C2_ER_IRQHandler(void)
+{
+  HAL_I2C_ER_IRQHandler(&hi2c2);
+}
+
+// ---- Error Handler ----
+void Error_Handler(void)
+{
+  while (1)
+  {
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    HAL_Delay(300);
+  }
+}

@@ -1,0 +1,38 @@
+#include "main.h"
+#include <string.h>
+
+DMA_HandleTypeDef hdma_memtomem;
+UART_HandleTypeDef huart2;
+SPI_HandleDef hspi2;
+uint8_t src_data[] = "MEM_TO_MEM_DMA";
+uint8_t dst_data[20];
+
+void SystemClock_Config(void);
+void MX_DMA_Init(void);
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_DMA_Init();
+
+  HAL_DMA_Start(&hdma_memtomem, (uint32_t)src_data, (uint32_t)dst_data, strlen((char*)src_data));
+  HAL_DMA_PollForTransfer(&hdma_memtomem, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY);
+
+  while (1);
+}
+
+void MX_DMA_Init(void)
+{
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  hdma_memtomem.Instance = DMA1_Channel1;
+  hdma_memtomem.Init.Direction = DMA_MEMORY_TO_MEMORY;
+  hdma_memtomem.Init.PeriphInc = DMA_PINC_ENABLE;
+  hdma_memtomem.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_memtomem.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+  hdma_memtomem.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+  hdma_memtomem.Init.Mode = DMA_NORMAL;
+  hdma_memtomem.Init.Priority = DMA_PRIORITY_LOW;
+  HAL_DMA_Init(&hdma_memtomem);
+}

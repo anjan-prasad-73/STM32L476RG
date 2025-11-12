@@ -1,0 +1,10 @@
+16:55:58 **** Incremental Build of configuration Debug for project 11_HAL_UART_TxToRxCopy_DMA ****
+make -j8 all 
+arm-none-eabi-size  11_HAL_UART_TxToRxCopy_DMA.elf 
+   text	   data	    bss	    dec	    hex	filename
+  18360	     32	   1960	  20352	   4f80	11_HAL_UART_TxToRxCopy_DMA.elf
+Finished building: default.size.stdout
+ 
+
+16:55:59 Build Finished. 0 errors, 0 warnings. (took 1s.395ms)
+

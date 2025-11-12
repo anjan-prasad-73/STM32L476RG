@@ -1,0 +1,180 @@
+#include "main.h"
+#include <string.h>
+
+/* --- Handles --- */
+UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_tx;
+DMA_HandleTypeDef hdma_usart2_rx;
+SPI_HandleTypeDef hspi2;
+/* --- Buffers --- */
+#define BUFFER_SIZE 32
+uint8_t txBuffer[BUFFER_SIZE] = "UART DMA TxToRx Copy Test\r\n";
+uint8_t rxBuffer[BUFFER_SIZE];
+volatile uint8_t transfer_done = 0;
+volatile uint8_t data_matched = 0;
+
+/* --- Function Prototypes --- */
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
+static void MX_USART2_UART_Init(void);
+void HAL_UART_TxToRxCopy_DMA(void);
+void Error_Handler(void);
+
+
+/* --- Main --- */
+int main(void)
+{
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    MX_DMA_Init();
+    MX_USART2_UART_Init();
+
+    /* Turn LED ON briefly to show startup */
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+    HAL_Delay(200);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
+    /* Start first transfer */
+    HAL_UART_TxToRxCopy_DMA();
+
+    while (1)
+    {
+        if (transfer_done)
+        {
+            transfer_done = 0;
+
+            /* Compare transmitted and received data */
+            if (memcmp(txBuffer, rxBuffer, strlen((char*)txBuffer)) == 0)
+            {
+                data_matched = 1;
+                HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // blink if OK
+            }
+            else
+            {
+                data_matched = 0;
+                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET); // solid ON = mismatch
+            }
+
+            HAL_Delay(1000);
+            HAL_UART_TxToRxCopy_DMA(); // repeat every second
+        }
+    }
+}
+
+/* --- UART TxToRx DMA function --- */
+void HAL_UART_TxToRxCopy_DMA(void)
+{
+    memset(rxBuffer, 0, BUFFER_SIZE);
+
+    /* Start RX DMA first */
+    if (HAL_UART_Receive_DMA(&huart2, rxBuffer, strlen((char*)txBuffer)) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /* Start TX DMA */
+    if (HAL_UART_Transmit_DMA(&huart2, txBuffer, strlen((char*)txBuffer)) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
+/* --- UART Init --- */
+static void MX_USART2_UART_Init(void)
+{
+    huart2.Instance = USART2;
+    huart2.Init.BaudRate = 115200;
+    huart2.Init.WordLength = UART_WORDLENGTH_8B;
+    huart2.Init.StopBits = UART_STOPBITS_1;
+    huart2.Init.Parity = UART_PARITY_NONE;
+    huart2.Init.Mode = UART_MODE_TX_RX;
+    huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+    if (HAL_UART_Init(&huart2) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
+/* --- DMA Init --- */
+static void MX_DMA_Init(void)
+{
+    __HAL_RCC_DMA1_CLK_ENABLE();
+
+    HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+
+    HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
+}
+
+/* --- GPIO Init --- */
+static void MX_GPIO_Init(void)
+{
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
+/* --- Callbacks --- */
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+        transfer_done = 1;
+    }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+        transfer_done = 1;
+    }
+}
+
+/* --- Clock Config --- */
+void SystemClock_Config(void)
+{
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+    HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+    RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+    RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6; // 4 MHz
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+    RCC_OscInitStruct.PLL.PLLM = 1;
+    RCC_OscInitStruct.PLL.PLLN = 40;
+    RCC_OscInitStruct.PLL.PLLR = 2;
+    RCC_OscInitStruct.PLL.PLLQ = 4;
+    RCC_OscInitStruct.PLL.PLLP = 7;
+    HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
+                                  RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4);
+}
+
+/* --- Error Handler --- */
+void Error_Handler(void)
+{
+    while (1)
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        HAL_Delay(200);
+    }
+}

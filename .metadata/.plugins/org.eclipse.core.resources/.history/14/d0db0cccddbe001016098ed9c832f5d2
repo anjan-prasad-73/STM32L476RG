@@ -1,0 +1,174 @@
+#include "main.h"
+#include <string.h>
+#include "stm32l4xx_hal_spi.h"
+
+
+/* Handles */
+SPI_HandleTypeDef hspi2;
+DMA_HandleTypeDef hdma_spi2_tx;
+DMA_HandleTypeDef hdma_spi2_rx;
+
+/* Test buffers */
+uint8_t txBuf[] = "STM32L476RG HAL SPI2 loopback test";
+uint8_t rxBuf[sizeof(txBuf)];
+
+/* Flags for DMA completion */
+volatile uint8_t spiTxDone = 0;
+volatile uint8_t spiRxDone = 0;
+
+static void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
+static void MX_SPI2_Init(void);
+
+static void Error_Blink(void);
+static void Pass_Blink(void);
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_SPI2_Init();
+
+  /* Small delay to stabilize */
+  HAL_Delay(10);
+
+  /* -------- OPTION A: POLLING (blocking) -------- */
+  // memset(rxBuf, 0, sizeof(rxBuf));
+  // if (HAL_SPI_TransmitReceive(&hspi2, txBuf, rxBuf, sizeof(txBuf), HAL_MAX_DELAY) != HAL_OK)
+  //   Error_Blink();
+  // if (memcmp(txBuf, rxBuf, sizeof(txBuf)) != 0)
+  //   Error_Blink();
+  // Pass_Blink();
+
+  /* -------- OPTION B: DMA (non-blocking) -------- */
+  memset(rxBuf, 0, sizeof(rxBuf));
+  spiTxDone = spiRxDone = 0;
+
+  if (HAL_SPI_TransmitReceive_DMA(&hspi2, txBuf, rxBuf, sizeof(txBuf)) != HAL_OK)
+    Error_Blink();
+
+  /* wait for DMA complete */
+  while (!(spiTxDone && spiRxDone)) { /* idle */ }
+
+  if (memcmp(txBuf, rxBuf, sizeof(txBuf)) != 0)
+    Error_Blink();
+
+  Pass_Blink();  /* if we reach here, it’s a pass */
+}
+
+/* === Clock: MSI + PLL @ 80 MHz (Cube default style) === */
+static void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /* MSI on, PLL on */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6; // 4 MHz
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+  RCC_OscInitStruct.PLL.PLLM = 1;
+  RCC_OscInitStruct.PLL.PLLN = 40;   // 4MHz * 40 = 160 MHz
+  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2; // 160/2 = 80 MHz SYSCLK
+  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) Error_Handler();
+
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK
+                              | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;   // 80
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;    // 80
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;    // 80
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK) Error_Handler();
+}
+
+/* === SPI2 init: Master, 8bit, Mode0, Prescaler/16 === */
+static void MX_SPI2_Init(void)
+{
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;   // Mode 0
+  hspi2.Init.NSS = SPI_NSS_SOFT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16; // ~5 MHz at 80 MHz PCLK
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 7;
+  hspi2.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
+  hspi2.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK) Error_Handler();
+}
+
+/* === DMA init for SPI2_TX & SPI2_RX === */
+static void MX_DMA_Init(void)
+{
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* NVIC for DMA1_Channel4 (SPI2_TX) & DMA1_Channel3 (SPI2_RX) on L4 */
+  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+
+  HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+}
+
+/* === GPIO: LED on PA5, SPI2 pins on PB12..PB15 are configured in MSP === */
+static void MX_GPIO_Init(void)
+{
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  GPIO_InitStruct.Pin = GPIO_PIN_5;      // LD2
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
+/* Blink fast forever = error */
+static void Error_Blink(void)
+{
+  while (1) {
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    HAL_Delay(150);
+  }
+}
+
+/* Blink slow forever = pass */
+static void Pass_Blink(void)
+{
+  while (1) {
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    HAL_Delay(600);
+  }
+}
+
+/* --- SPI callbacks (DMA path) --- */
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+  if (hspi->Instance == SPI2) spiTxDone = 1;
+}
+void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+  if (hspi->Instance == SPI2) spiRxDone = 1;
+}
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+  /* This also fires for TxRx; we already set both flags individually. */
+}
+
+/* --- Error handler --- */
+void Error_Handler(void)
+{
+  __disable_irq();
+  Error_Blink();
+}

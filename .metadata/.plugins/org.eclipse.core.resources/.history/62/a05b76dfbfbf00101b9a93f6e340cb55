@@ -1,0 +1,149 @@
+#include "main.h"
+
+TIM_HandleTypeDef htim6;
+UART_HandleTypeDef huart2;
+SPI_HandleTypeDef hspi2;
+
+/* Function Prototypes */
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_TIM6_Init(void);
+void Error_Handler(void);
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_TIM6_Init();
+
+  /* Start TIM6 */
+  HAL_TIM_Base_Start(&htim6);
+
+  while (1)
+  {
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);   // Toggle LD2
+    __HAL_TIM_SET_COUNTER(&htim6, 0);
+
+    /* Wait until TIM6 counts 1000 ticks (1 sec) */
+    while (__HAL_TIM_GET_COUNTER(&htim6) < 1000);
+  }
+}
+
+/* --- GPIO Init --- */
+static void MX_GPIO_Init(void)
+{
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_5;  // On-board LED
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
+/* --- TIM6 Init --- */
+static void MX_TIM6_Init(void)
+{
+  __HAL_RCC_TIM6_CLK_ENABLE();
+
+  /*
+   * CPU Clock = 80 MHz
+   * TIM6 Prescaler = 8000 - 1 → timer clock = 10 kHz (0.1 ms per tick)
+   * Period = 10000 - 1 → overflow every 1 s
+   */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 8000 - 1;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 10000 - 1;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/* --- Clock Config for 80 MHz (default Nucleo setting) --- */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;  // 4 MHz
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+  RCC_OscInitStruct.PLL.PLLM = 1;
+  RCC_OscInitStruct.PLL.PLLN = 40;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  RCC_OscInitStruct.PLL.PLLP = 7;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    Error_Handler();
+
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+                              | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+    Error_Handler();
+}
+
+/* --- Error Handler --- */
+void Error_Handler(void)
+{
+  __disable_irq();
+  while (1)
+  {
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    HAL_Delay(100);
+  }
+}
+🧩 What Changed (and Why It Works)
+Fix	Reason
+Uses MSI + PLL @ 80 MHz	Default clock for Nucleo-L476RG
+TIM6 prescaler adjusted (8000−1)	Timer tick = 0.1 ms (10 kHz)
+TIM6 period = 10000−1	1 s overflow interval
+LED pin = PA5	Built-in LD2 (green)
+Added full GPIO + clock init	Ensures LED toggling works
+
+✅ How to Test on NUCLEO-L476RG
+Open STM32CubeIDE.
+
+Create new project → NUCLEO-L476RG.
+
+Replace Core/Src/main.c with the code above.
+
+Build → Run (debug or upload).
+
+Observe the green LD2 LED on the board.
+
+👉 It should blink once per second.
+
+🧠 Why it wasn’t blinking before
+Possible Cause	Explanation
+Wrong clock source	TIM6 was clocked from APB1 (not 16 MHz), so your timing math was off.
+LED on PB2 (no LED connected)	Nucleo’s LED is on PA5, not PB2.
+GPIO not initialized	Pin wasn’t configured for output mode.
+
+Would you like me to show the interrupt-based version next (using HAL_TIM_PeriodElapsedCallback()), so the LED blinks automatically without blocking the CPU loop?
+
+
+
+
+
+
+
+
+
+
+
+
+
+ChatGPT can make mistakes. Check important info. See Cookie Preferences.

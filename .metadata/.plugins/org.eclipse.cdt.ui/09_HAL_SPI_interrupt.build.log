@@ -1,0 +1,10 @@
+12:43:50 **** Incremental Build of configuration Debug for project 09_HAL_SPI_interrupt ****
+make -j8 all 
+arm-none-eabi-size  09_HAL_SPI_interrupt.elf 
+   text	   data	    bss	    dec	    hex	filename
+  11512	     20	   1812	  13344	   3420	09_HAL_SPI_interrupt.elf
+Finished building: default.size.stdout
+ 
+
+12:43:51 Build Finished. 0 errors, 0 warnings. (took 1s.711ms)
+

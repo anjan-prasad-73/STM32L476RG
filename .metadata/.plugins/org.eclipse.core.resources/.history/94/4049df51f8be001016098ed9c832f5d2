@@ -1,0 +1,67 @@
+#include "main.h"
+#include <string.h>
+
+UART_HandleTypeDef huart2;
+
+uint8_t rx_data;        // single byte buffer
+uint8_t rx_buffer[50];  // store message
+uint8_t idx = 0;
+
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_USART2_UART_Init(void);
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_USART2_UART_Init();
+
+  char msg[] = "UART Ready. Type something:\r\n";
+  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+
+  // Start UART Reception Interrupt
+  HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+
+  while (1)
+  {
+    // main loop does nothing; UART interrupt handles RX
+  }
+}
+
+// UART RX Complete Callback
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if(huart->Instance == USART2)
+  {
+    if(rx_data != '\n')   // until Enter key pressed
+    {
+      rx_buffer[idx++] = rx_data;
+    }
+    else
+    {
+      rx_buffer[idx] = '\0';
+      HAL_UART_Transmit(&huart2, rx_buffer, strlen((char*)rx_buffer), HAL_MAX_DELAY);
+      HAL_UART_Transmit(&huart2, (uint8_t*)"\r\n", 2, HAL_MAX_DELAY);
+      idx = 0;
+    }
+
+    // Re-enable interrupt reception
+    HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+  }
+}
+
+// USART2 Init
+static void MX_USART2_UART_Init(void)
+{
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 9600;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  HAL_UART_Init(&huart2);
+}

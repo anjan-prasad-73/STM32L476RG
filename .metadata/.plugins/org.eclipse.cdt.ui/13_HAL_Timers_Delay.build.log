@@ -1,0 +1,36 @@
+17:35:33 **** Incremental Build of configuration Debug for project 13_HAL_Timers_Delay ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L476xx -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+In file included from ../Core/Inc/stm32l4xx_hal_conf.h:442,
+                 from ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:29,
+                 from ../Core/Inc/main.h:30,
+                 from ../Core/Src/main.c:1:
+../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim.h:1004: warning: "TIM_OCMODE_ASSYMETRIC_PWM1" redefined
+ 1004 | #define TIM_OCMODE_ASSYMETRIC_PWM1         (TIM_CCMR1_OC1M_3 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2)  /*!< Asymmetric PWM mode 1                  */
+      | 
+In file included from ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_def.h:30,
+                 from ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rcc.h:27,
+                 from ../Core/Inc/stm32l4xx_hal_conf.h:258:
+../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h:4258: note: this is the location of the previous definition
+ 4258 | #define TIM_OCMODE_ASSYMETRIC_PWM1      TIM_OCMODE_ASYMMETRIC_PWM1
+      | 
+../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim.h:1005: warning: "TIM_OCMODE_ASSYMETRIC_PWM2" redefined
+ 1005 | #define TIM_OCMODE_ASSYMETRIC_PWM2         TIM_CCMR1_OC1M                                            /*!< Asymmetric PWM mode 2                  */
+      | 
+../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h:4259: note: this is the location of the previous definition
+ 4259 | #define TIM_OCMODE_ASSYMETRIC_PWM2      TIM_OCMODE_ASYMMETRIC_PWM2
+      | 
+arm-none-eabi-gcc -o "13_HAL_Timers_Delay.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\13_HAL_Timers_Delay\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="13_HAL_Timers_Delay.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: 13_HAL_Timers_Delay.elf
+ 
+arm-none-eabi-size  13_HAL_Timers_Delay.elf 
+arm-none-eabi-objdump -h -S 13_HAL_Timers_Delay.elf  > "13_HAL_Timers_Delay.list"
+   text	   data	    bss	    dec	    hex	filename
+   9596	     12	   1884	  11492	   2ce4	13_HAL_Timers_Delay.elf
+Finished building: default.size.stdout
+ 
+Finished building: 13_HAL_Timers_Delay.list
+ 
+
+17:35:37 Build Finished. 0 errors, 2 warnings. (took 3s.540ms)
+

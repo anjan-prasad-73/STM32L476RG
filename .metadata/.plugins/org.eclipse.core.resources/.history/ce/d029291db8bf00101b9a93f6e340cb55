@@ -1,0 +1,55 @@
+#include "main.h"
+#include "string.h"
+
+UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_tx, hdma_rx;
+
+uint8_t tx_data[] = "HELLO DMA UART";
+uint8_t rx_data[20];
+
+void SystemClock_Config(void);
+void MX_USART2_UART_Init(void);
+void MX_DMA_Init(void);
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_DMA_Init();
+  MX_USART2_UART_Init();
+
+  HAL_UART_Receive_DMA(&huart2, rx_data, sizeof(tx_data));
+  HAL_UART_Transmit_DMA(&huart2, tx_data, sizeof(tx_data));
+
+  while (1)
+  {
+    if (HAL_UART_GetState(&huart2) == HAL_UART_STATE_READY)
+    {
+      HAL_UART_Transmit(&huart2, rx_data, sizeof(tx_data), HAL_MAX_DELAY);
+      HAL_Delay(1000);
+    }
+  }
+}
+
+/* USART2 init function */
+void MX_USART2_UART_Init(void)
+{
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  HAL_UART_Init(&huart2);
+}
+
+void MX_DMA_Init(void)
+{
+  __HAL_RCC_DMA1_CLK_ENABLE();
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+  HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
+}
+
+/* Add CubeIDE auto-generated SystemClock_Config() */

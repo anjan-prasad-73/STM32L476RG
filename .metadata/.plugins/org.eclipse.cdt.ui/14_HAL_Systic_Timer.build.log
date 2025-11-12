@@ -1,0 +1,10 @@
+17:40:35 **** Incremental Build of configuration Debug for project 14_HAL_Systic_Timer ****
+make -j8 all 
+arm-none-eabi-size  14_HAL_Systic_Timer.elf 
+   text	   data	    bss	    dec	    hex	filename
+   8856	     12	   1804	  10672	   29b0	14_HAL_Systic_Timer.elf
+Finished building: default.size.stdout
+ 
+
+17:40:36 Build Finished. 0 errors, 0 warnings. (took 1s.469ms)
+
