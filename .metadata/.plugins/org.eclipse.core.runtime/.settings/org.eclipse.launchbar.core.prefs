@@ -1,7 +1,7 @@
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=win32
-configDescList=org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:15_HAL_ADC,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:15_HAL_ADC ,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:15_HAL_ADC Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:15_HAL_ADC Debug 
+configDescList=org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:17_HAL_RTC,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:17_HAL_RTC ,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:17_HAL_RTC 1,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:17_HAL_RTC Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:17_HAL_RTC Debug ,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:17_HAL_RTC Debug(1),org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:17_HAL_RTC Debug (1)
 eclipse.preferences.version=1
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:02_OnboardUserButton/activeLaunchMode=debug
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:02_OnboardUserButton/activeLaunchTarget=null\:---
@@ -20,6 +20,10 @@ org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:12_HAL_UART_MemToMem_DMA\ (1)/a
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:12_HAL_UART_MemToMem_DMA/activeLaunchMode=run
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:13_HAL_Timers_Delay\ Debug/activeLaunchMode=debug
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:13_HAL_Timers_Delay/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:14_HAL_Systic_Timer\ \ Debug/activeLaunchMode=run
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:14_HAL_Systic_Timer\ Debug/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:16_HAL_DAC\ Debug\ (1)/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:16_HAL_DAC/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:17_HAL_RTC/activeLaunchMode=run
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:ex/activeLaunchMode=debug
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:ex/activeLaunchTarget=null\:---
