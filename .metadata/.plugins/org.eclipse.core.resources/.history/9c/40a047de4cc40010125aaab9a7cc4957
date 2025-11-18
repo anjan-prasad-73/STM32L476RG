@@ -1,0 +1,17 @@
+#include "stm32l476xx.h"
+#include "system_clock.h"
+#include "spi_master.h"
+
+volatile uint8_t rx_byte = 0;
+
+int main(void)
+{
+    SystemClock_HSI16();    // 16 MHz
+    spi1_master_init();     // SPI1 on PA5/PA6/PA7
+
+    while (1)
+    {
+        rx_byte = spi1_transfer(0x55);   // MUST read back 0x55
+        for (volatile int i = 0; i < 50000; i++);
+    }
+}

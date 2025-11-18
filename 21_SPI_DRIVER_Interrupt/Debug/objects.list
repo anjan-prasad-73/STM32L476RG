@@ -1,0 +1,7 @@
+"./Src/main.o"
+"./Src/spi_irq.o"
+"./Src/spi_master.o"
+"./Src/syscalls.o"
+"./Src/sysmem.o"
+"./Src/system_clock.o"
+"./Startup/startup_stm32l476rgtx.o"

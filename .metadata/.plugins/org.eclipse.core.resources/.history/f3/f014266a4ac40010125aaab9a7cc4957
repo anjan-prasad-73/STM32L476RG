@@ -1,0 +1,20 @@
+#include "stm32l476xx.h"
+#include "gpio_driver.h"
+#include "spi_master.h"
+
+void SystemClock_HSI16(void);
+
+volatile uint8_t rx_byte;
+
+int main(void)
+{
+    SystemClock_HSI16();
+
+    spi1_master_init();
+
+    while (1)
+    {
+        rx_byte = spi1_transfer(0x55);  // <-- View this in debugger
+        for (volatile int d = 0; d < 50000; d++);
+    }
+}

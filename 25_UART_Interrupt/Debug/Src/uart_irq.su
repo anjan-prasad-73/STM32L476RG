@@ -1,0 +1,5 @@
+D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include/core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static,ignoring_inline_asm
+D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include/core_cm4.h:1809:22:__NVIC_SetPriority	16	static
+../Src/uart_irq.c:7:6:usart2_irq_init	24	static
+../Src/uart_irq.c:40:6:usart2_write	16	static
+../Src/uart_irq.c:46:6:USART2_IRQHandler	16	static

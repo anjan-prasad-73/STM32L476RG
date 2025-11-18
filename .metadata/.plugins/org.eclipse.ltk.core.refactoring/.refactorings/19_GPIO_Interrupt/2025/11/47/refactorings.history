@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;19_GPIO_Interrupt/18_GPIO_Driver Debug.launch&apos; to &apos;19_GPIO_Interrupt Debug.launch&apos;" description="Rename resource &apos;18_GPIO_Driver Debug.launch&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="18_GPIO_Driver Debug.launch" name="19_GPIO_Interrupt Debug.launch" stamp="1763444341188" updateReferences="true"/>
+</session>

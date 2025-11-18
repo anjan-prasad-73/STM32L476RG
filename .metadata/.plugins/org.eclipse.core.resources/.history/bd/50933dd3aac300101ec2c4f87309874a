@@ -1,0 +1,28 @@
+// system_clock.c
+// Minimal switch to HSI16 and wait until HSI used as SYSCLK
+// No HAL. Uses CMSIS device header stm32l476xx.h
+
+#include "stm32l476xx.h"
+
+void SystemClock_HSI16(void)
+{
+    // 1) Enable HSI16
+    RCC->CR |= RCC_CR_HSION; // Enable HSI16
+
+    // Wait until HSI is ready
+    while (!(RCC->CR & RCC_CR_HSIRDY)) { __NOP(); }
+
+    // 2) (Optional) Configure Flash latency for 16 MHz
+    // For 16 MHz, zero wait states is fine, but keep default safe operation:
+    FLASH->ACR &= ~FLASH_ACR_LATENCY;
+    FLASH->ACR |= FLASH_ACR_LATENCY_0;
+
+    // 3) Select HSI as system clock
+    RCC->CFGR &= ~RCC_CFGR_SW;              // clear SW bits
+    RCC->CFGR |= RCC_CFGR_SW_HSI;          // select HSI as SYSCLK
+
+    // Wait until HSI is used as system clock
+    while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI) { __NOP(); }
+
+    // Now SYSCLK = HSI16 (approx 16 MHz)
+}

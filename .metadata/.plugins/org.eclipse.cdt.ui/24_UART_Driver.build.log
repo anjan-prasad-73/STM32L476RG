@@ -1,0 +1,17 @@
+13:30:20 **** Incremental Build of configuration Debug for project 24_UART_Driver ****
+make -j8 all 
+arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Device/ST/STM32L4xx/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/STM32L4xx_HAL_Driver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main.o"
+arm-none-eabi-gcc -o "24_UART_Driver.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\24_UART_Driver\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="24_UART_Driver.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: 24_UART_Driver.elf
+ 
+arm-none-eabi-size  24_UART_Driver.elf 
+arm-none-eabi-objdump -h -S 24_UART_Driver.elf  > "24_UART_Driver.list"
+   text	   data	    bss	    dec	    hex	filename
+   1144	      0	   1568	   2712	    a98	24_UART_Driver.elf
+Finished building: default.size.stdout
+ 
+Finished building: 24_UART_Driver.list
+ 
+
+13:30:27 Build Finished. 0 errors, 0 warnings. (took 6s.414ms)
+

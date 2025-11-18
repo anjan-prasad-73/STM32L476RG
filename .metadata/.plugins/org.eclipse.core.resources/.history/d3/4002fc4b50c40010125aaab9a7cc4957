@@ -1,0 +1,13 @@
+/*
+ * i2c_driver.h
+ *
+ *  Created on: Nov 18, 2025
+ *      Author: augus
+ */
+
+#ifndef I2C_DRIVER_H_
+#define I2C_DRIVER_H_
+
+
+
+#endif /* I2C_DRIVER_H_ */

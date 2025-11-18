@@ -1,0 +1,3 @@
+../Src/uart.c:3:6:usart2_init	24	static
+../Src/uart.c:33:6:usart2_send	16	static
+../Src/uart.c:41:9:usart2_recv	4	static

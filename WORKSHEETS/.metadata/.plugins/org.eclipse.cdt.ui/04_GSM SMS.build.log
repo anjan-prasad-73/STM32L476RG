@@ -1,0 +1,29 @@
+17:47:28 **** Incremental Build of configuration Debug for project 04_GSM SMS ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L476xx -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:99:9: warning: implicit declaration of function 'snprintf' [-Wimplicit-function-declaration]
+   99 |         snprintf(out, sizeof(out), "Lat: %s Lon: %s\r\n", lat, lon);
+      |         ^~~~~~~~
+../Core/Src/main.c:23:1: note: include '<stdio.h>' or provide a declaration of 'snprintf'
+   22 | #include <string.h>
+  +++ |+#include <stdio.h>
+   23 | 
+../Core/Src/main.c:99:9: warning: incompatible implicit declaration of built-in function 'snprintf' [-Wbuiltin-declaration-mismatch]
+   99 |         snprintf(out, sizeof(out), "Lat: %s Lon: %s\r\n", lat, lon);
+      |         ^~~~~~~~
+../Core/Src/main.c:99:9: note: include '<stdio.h>' or provide a declaration of 'snprintf'
+arm-none-eabi-gcc -o "04_GSM SMS.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\WORKSHEETS\04_GSM SMS\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="04_GSM SMS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: 04_GSM SMS.elf
+ 
+arm-none-eabi-size  04_GSM\ SMS.elf 
+arm-none-eabi-objdump -h -S 04_GSM\ SMS.elf  > "04_GSM SMS.list"
+   text	   data	    bss	    dec	    hex	filename
+  19172	    104	   2040	  21316	   5344	04_GSM SMS.elf
+Finished building: default.size.stdout
+ 
+Finished building: 04_GSM SMS.list
+ 
+
+17:47:32 Build Finished. 0 errors, 2 warnings. (took 3s.493ms)
+

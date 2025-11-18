@@ -1,0 +1,17 @@
+#include "stm32l476xx.h"
+#include "system_clock.h"
+#include "spi_master.h"
+
+volatile uint8_t rx_byte;
+
+int main(void)
+{
+    SystemClock_HSI16();
+    spi1_master_init();
+
+    while(1)
+    {
+        rx_byte = spi1_transfer(0x55);   // must return 0x55
+        for (volatile int i = 0; i < 50000; i++);
+    }
+}

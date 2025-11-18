@@ -1,0 +1,11 @@
+#ifndef UART_H
+#define UART_H
+
+#include "stm32l476xx.h"
+#include <stdint.h>
+
+void usart2_init(uint32_t baud);
+void usart2_tx(const uint8_t *buf, int len);
+int  usart2_rx(uint8_t *buf, int len, int timeout_ms); // returns bytes read
+
+#endif

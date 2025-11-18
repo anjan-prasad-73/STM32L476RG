@@ -1,0 +1,43 @@
+#include "stm32l476xx.h"
+#include "system_clock.h"
+#include "i2c_driver.h"
+
+volatile uint32_t isr_before;
+volatile uint32_t isr_after;
+volatile uint8_t nack_detected = 0;
+
+int main(void)
+{
+    SystemClock_HSI16();
+    i2c1_init();
+
+    uint8_t dev_addr = 0x68; // any address is fine; no slave is present
+
+    // Load registers before start
+    isr_before = I2C1->ISR;
+
+    // Send START + address → slave will NACK
+    I2C1->CR2 = (dev_addr << 1) | (I2C_WRITE << 10) | (1U << 16);
+    I2C1->CR2 |= I2C_CR2_START;
+
+    // Wait for NACK
+    while (!(I2C1->ISR & (I2C_ISR_NACKF | I2C_ISR_STOPF)))
+    {
+        // wait for result
+    }
+
+    isr_after = I2C1->ISR;
+
+    // Check if NACK was detected
+    if (I2C1->ISR & I2C_ISR_NACKF) {
+        nack_detected = 1;
+        I2C1->ICR |= I2C_ICR_NACKCF;  // clear NACK flag
+    }
+
+    // Send STOP
+    I2C1->CR2 |= I2C_CR2_STOP;
+    while (I2C1->ISR & I2C_ISR_STOPF)
+        I2C1->ICR |= I2C_ICR_STOPCF;
+
+    while(1);
+}

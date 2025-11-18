@@ -1,0 +1,43 @@
+/*
+ main_uart.c
+ - Initializes SystemClock_HSI16()
+ - Initializes USART2 at 115200
+ - Periodically sends "Hello\n"
+ - Echoes any received byte (polling)
+ Wiring:
+  - PA2 -> TX (connect to USB->UART adapter if testing externally)
+  - PA3 -> RX
+ Note: Nucleo's ST-LINK V2-1 provides virtual COM on some boards via ST-LINK, but
+ on Nucleo-L476RG you may need an external USB-UART adapter connected to PA2/PA3.
+*/
+
+#include "stm32l476xx.h"
+#include "system_clock.h"
+#include "uart.h"
+
+int main(void)
+{
+    SystemClock_HSI16();
+
+    // Init UART
+    usart2_init(115200);
+
+    const char msg[] = "Hello from STM32L476\r\n";
+    uint8_t rxb[16];
+
+    while (1)
+    {
+        // Send hello
+        usart2_tx((const uint8_t*)msg, sizeof(msg)-1);
+
+        // Try to read up to 8 bytes with 200 ms timeout
+        int n = usart2_rx(rxb, 8, 200);
+        if (n > 0) {
+            // Echo back received bytes
+            usart2_tx(rxb, n);
+        }
+
+        // crude delay ~ 500 ms
+        for (volatile int d=0; d<800000; d++) __asm__("nop");
+    }
+}

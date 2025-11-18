@@ -1,0 +1,2 @@
+../Src/spi_master.c:3:6:spi1_master_init	4	static
+../Src/spi_master.c:40:9:spi1_transfer	16	static

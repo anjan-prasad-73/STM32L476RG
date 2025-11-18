@@ -1,0 +1,25 @@
+#include "stm32l476xx.h"
+#include "system_clock.h"
+#include "i2c_driver.h"
+
+volatile uint8_t whoami;
+
+int main(void)
+{
+    SystemClock_HSI16();
+    i2c1_init();
+
+    // Example: Read from MPU6050 WHO_AM_I (register 0x75)
+    uint8_t dev_addr = 0x68;
+
+    i2c1_start(dev_addr, I2C_WRITE);
+    i2c1_write(0x75);          // Register address
+    i2c1_stop();
+
+    // Restart for reading
+    i2c1_start(dev_addr, I2C_READ);
+    whoami = i2c1_read_nack();
+    i2c1_stop();
+
+    while(1);
+}
