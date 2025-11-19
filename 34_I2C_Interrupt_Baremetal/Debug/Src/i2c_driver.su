@@ -1,0 +1,6 @@
+../Src/i2c_driver.c:6:6:i2c1_init	4	static
+../Src/i2c_driver.c:40:6:i2c1_start	16	static
+../Src/i2c_driver.c:55:6:i2c1_write	16	static
+../Src/i2c_driver.c:61:9:i2c1_read_ack	4	static
+../Src/i2c_driver.c:67:9:i2c1_read_nack	4	static
+../Src/i2c_driver.c:74:6:i2c1_stop	4	static

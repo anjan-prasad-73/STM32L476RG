@@ -1,0 +1,5 @@
+D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include/core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static,ignoring_inline_asm
+D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include/core_cm4.h:1809:22:__NVIC_SetPriority	16	static
+../Src/spi_irq.c:6:20:led_init_pb3	4	static
+../Src/spi_irq.c:25:6:SPI1_IRQHandler	16	static
+../Src/spi_irq.c:39:6:spi1_irq_init	8	static

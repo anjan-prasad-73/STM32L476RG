@@ -1,0 +1,29 @@
+#include "stm32l476xx.h"
+#include "system_clock.h"
+#include "uart.h"
+
+int main(void)
+{
+    SystemClock_HSI16();       // 16 MHz internal clock
+    usart2_init(115200);       // Initialize UART2
+
+    uint8_t ch;
+
+    // Send startup message
+    usart2_send('B');
+    usart2_send('I');
+    usart2_send('T');
+    usart2_send('S');
+    usart2_send('I');
+    usart2_send('L');
+    usart2_send('I');
+    usart2_send('C');
+    usart2_send('A');
+    usart2_send('\n');
+
+    while (1)
+    {
+        ch = usart2_recv();  // read byte from RX
+        usart2_send(ch);     // echo back on TX
+    }
+}

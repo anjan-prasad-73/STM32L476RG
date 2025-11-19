@@ -1,0 +1,7 @@
+"./Src/i2c_driver.o"
+"./Src/i2c_irq.o"
+"./Src/main.o"
+"./Src/syscalls.o"
+"./Src/sysmem.o"
+"./Src/system_clock.o"
+"./Startup/startup_stm32l476rgtx.o"

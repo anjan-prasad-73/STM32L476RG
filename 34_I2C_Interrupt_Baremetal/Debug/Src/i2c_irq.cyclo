@@ -1,0 +1,8 @@
+D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include/core_cm4.h:1679:22:__NVIC_EnableIRQ	2
+D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include/core_cm4.h:1809:22:__NVIC_SetPriority	2
+../Src/i2c_irq.c:7:6:i2c1_irq_init	1
+../Src/i2c_irq.c:28:6:i2c1_irq_start	1
+../Src/i2c_irq.c:43:6:i2c1_irq_write	1
+../Src/i2c_irq.c:48:6:i2c1_irq_read	1
+../Src/i2c_irq.c:55:6:I2C1_EV_IRQHandler	4
+../Src/i2c_irq.c:74:6:I2C1_ER_IRQHandler	1

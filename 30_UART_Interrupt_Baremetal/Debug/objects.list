@@ -1,0 +1,7 @@
+"./Src/main.o"
+"./Src/syscalls.o"
+"./Src/sysmem.o"
+"./Src/system_clock.o"
+"./Src/uart.o"
+"./Src/uart_irq.o"
+"./Startup/startup_stm32l476rgtx.o"
