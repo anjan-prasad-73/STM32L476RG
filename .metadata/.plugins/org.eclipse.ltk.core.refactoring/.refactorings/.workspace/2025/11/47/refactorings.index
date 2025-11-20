@@ -26,3 +26,5 @@
 1763452391755	Delete resource '24_UART_Driver/Inc/i2c_irq.h'
 1763452396712	Delete resource '24_UART_Driver/Src/i2c_driver.c'
 1763452400073	Delete resource '24_UART_Driver/Src/i2c_irq.c'
+1763645735804	Delete resource '18_GPIO_Driver'
+1763645752563	Delete 7 resources

@@ -1,0 +1,6 @@
+../Core/Src/main.c:11:6:SystemClock_Config_HSI	4	static
+../Core/Src/main.c:19:6:SysTick_Init_1ms	4	static
+../Core/Src/main.c:27:6:delay_ms	24	static
+../Core/Src/main.c:33:6:dwt_delay_init	4	static
+../Core/Src/main.c:40:6:delay_us	24	static
+../Core/Src/main.c:46:5:main	8	static

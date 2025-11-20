@@ -1,40 +1,21 @@
-13:34:51 **** Clean-only build of configuration Debug for project 25_UART_Interrupt ****
-make -j8 clean 
-rm -rf ./Startup/startup_stm32l476rgtx.d ./Startup/startup_stm32l476rgtx.o
-rm -rf ./Src/main.cyclo ./Src/main.d ./Src/main.o ./Src/main.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su ./Src/system_clock.cyclo ./Src/system_clock.d ./Src/system_clock.o ./Src/system_clock.su ./Src/uart.cyclo ./Src/uart.d ./Src/uart.o ./Src/uart.su
-rm -rf 24_UART_Driver.elf 24_UART_Driver.list 24_UART_Driver.map default.size.stdout
- 
-13:34:52 **** Build of configuration Debug for project 25_UART_Interrupt ****
+20:08:15 **** Incremental Build of configuration Debug for project 39_Ultrasonic_test_Baremetal ****
 make -j8 all 
-arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -x assembler-with-cpp -MMD -MP -MF"Startup/startup_stm32l476rgtx.d" -MT"Startup/startup_stm32l476rgtx.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Startup/startup_stm32l476rgtx.o" "../Startup/startup_stm32l476rgtx.s"
-arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Device/ST/STM32L4xx/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/STM32L4xx_HAL_Driver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main.o"
-arm-none-eabi-gcc "../Src/syscalls.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Device/ST/STM32L4xx/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/STM32L4xx_HAL_Driver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/syscalls.d" -MT"Src/syscalls.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/syscalls.o"
-arm-none-eabi-gcc "../Src/sysmem.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Device/ST/STM32L4xx/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/STM32L4xx_HAL_Driver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/sysmem.d" -MT"Src/sysmem.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/sysmem.o"
-arm-none-eabi-gcc "../Src/system_clock.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Device/ST/STM32L4xx/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/STM32L4xx_HAL_Driver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/system_clock.d" -MT"Src/system_clock.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/system_clock.o"
-arm-none-eabi-gcc "../Src/uart.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Device/ST/STM32L4xx/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/STM32L4xx_HAL_Driver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/uart.d" -MT"Src/uart.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/uart.o"
-arm-none-eabi-gcc "../Src/uart_irq.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32L4 -DSTM32 -DNUCLEO_L476RG -DSTM32L476RGTx -c -I../Inc -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Device/ST/STM32L4xx/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/CMSIS/Include" -I"D:/BITSILICA_WORKSHEETS/Drivers/Drivers/STM32L4xx_HAL_Driver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/uart_irq.d" -MT"Src/uart_irq.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/uart_irq.o"
-arm-none-eabi-gcc -o "25_UART_Interrupt.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\25_UART_Interrupt\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="25_UART_Interrupt.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: 25_UART_Interrupt.elf
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L476xx -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc -o "39_Ultrasonic_test_Baremetal.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\39_Ultrasonic_test_Baremetal\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="39_Ultrasonic_test_Baremetal.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: 39_Ultrasonic_test_Baremetal.elf
  
-arm-none-eabi-size  25_UART_Interrupt.elf 
-arm-none-eabi-objdump -h -S 25_UART_Interrupt.elf  > "25_UART_Interrupt.list"
+arm-none-eabi-size  39_Ultrasonic_test_Baremetal.elf 
+arm-none-eabi-objdump -h -S 39_Ultrasonic_test_Baremetal.elf  > "39_Ultrasonic_test_Baremetal.list"
    text	   data	    bss	    dec	    hex	filename
-   1364	      0	   1632	   2996	    bb4	25_UART_Interrupt.elf
+   1888	      4	   1572	   3464	    d88	39_Ultrasonic_test_Baremetal.elf
 Finished building: default.size.stdout
-Finished building: 25_UART_Interrupt.list
+Finished building: 39_Ultrasonic_test_Baremetal.list
  
  
-13:35:14 **** Incremental Build of configuration Debug for project 25_UART_Interrupt ****
+20:08:25 **** Incremental Build of configuration Debug for project 39_Ultrasonic_test_Baremetal ****
 make -j8 all 
-arm-none-eabi-size  25_UART_Interrupt.elf 
+arm-none-eabi-size  39_Ultrasonic_test_Baremetal.elf 
    text	   data	    bss	    dec	    hex	filename
-   1364	      0	   1632	   2996	    bb4	25_UART_Interrupt.elf
-Finished building: default.size.stdout
- 
-13:36:15 **** Incremental Build of configuration Debug for project 25_UART_Interrupt ****
-make -j8 all 
-arm-none-eabi-size  25_UART_Interrupt.elf 
-   text	   data	    bss	    dec	    hex	filename
-   1364	      0	   1632	   2996	    bb4	25_UART_Interrupt.elf
+   1888	      4	   1572	   3464	    d88	39_Ultrasonic_test_Baremetal.elf
 Finished building: default.size.stdout
  

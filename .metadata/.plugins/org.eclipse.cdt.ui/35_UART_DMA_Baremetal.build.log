@@ -1,0 +1,10 @@
+19:41:34 **** Incremental Build of configuration Debug for project 35_UART_DMA_Baremetal ****
+make -j8 all 
+arm-none-eabi-size  35_UART_DMA_Baremetal.elf 
+   text	   data	    bss	    dec	    hex	filename
+   1600	      4	   1572	   3176	    c68	35_UART_DMA_Baremetal.elf
+Finished building: default.size.stdout
+ 
+
+19:41:35 Build Finished. 0 errors, 0 warnings. (took 1s.273ms)
+

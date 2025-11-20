@@ -1,0 +1,84 @@
+/* 35_UART_DMA_BareMetal.c
+   STM32L476RG - HSI 16MHz, USART2 (PA2=TX, PA3=RX), DMA1 Channel4 used for USART2 TX
+   Compile with CMSIS device header (stm32l476xx.h) and startup vector.
+*/
+
+#include "stm32l476xx.h"
+#include <string.h>
+
+#define SYSCLK_HZ 16000000U
+const char msg[] = "Hello from USART2 + DMA (STM32L476RG)\r\n";
+
+void SystemClock_Config_HSI(void) {
+    /* Assuming reset state; enable HSI and use it as system clock (default on reset often MSI,
+       but here we force HSI as system clock for consistency). */
+    /* Enable HSI16 */
+    RCC->CR |= RCC_CR_HSION;
+    while (!(RCC->CR & RCC_CR_HSIRDY));
+    /* Select HSI as SYSCLK */
+    RCC->CFGR &= ~RCC_CFGR_SW;
+    RCC->CFGR |= RCC_CFGR_SW_HSI;
+    while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
+    /* Update SystemCoreClock variable if present elsewhere - we rely on SYSCLK_HZ constant */
+}
+
+void uart2_gpio_init(void) {
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+    /* PA2/PA3 to AF7 */
+    GPIOA->MODER &= ~((3<<4) | (3<<6));
+    GPIOA->MODER |=  (2<<4) | (2<<6); // AF mode
+    GPIOA->AFR[0] &= ~((0xF<<8) | (0xF<<12));
+    GPIOA->AFR[0] |=  (7<<8)  | (7<<12); // AF7 = USART2
+}
+
+void uart2_init(uint32_t pclk) {
+    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
+    USART2->CR1 = 0;
+    /* Baudrate = pclk / 115200 */
+    USART2->BRR = (uint32_t)( (pclk + (115200/2)) / 115200 ); // rounded
+    USART2->CR3 = 0;
+    USART2->CR1 |= USART_CR1_TE; // enable TX
+    USART2->CR1 |= USART_CR1_UE; // enable USART
+    while (!(USART2->ISR & USART_ISR_TEACK));
+}
+
+void dma_usart2_tx_setup(void) {
+    /* Enable DMA1 clock */
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+
+    /* Disable channel first */
+    DMA1_Channel4->CCR &= ~DMA_CCR_EN;
+    while (DMA1_Channel4->CCR & DMA_CCR_EN);
+
+    /* Peripheral addr = USART2 TDR */
+    DMA1_Channel4->CPAR = (uint32_t)&(USART2->TDR);
+    /* Memory addr = message */
+    DMA1_Channel4->CMAR = (uint32_t)msg;
+    DMA1_Channel4->CNDTR = (uint32_t)strlen(msg);
+
+    /* Configure: MINC, DIR mem->periph (DIR=1), 8-bit sizes, medium priority */
+    DMA1_Channel4->CCR = 0;
+    DMA1_Channel4->CCR |= DMA_CCR_MINC | (1<<4) /* DIR=1 */ | (1<<12); // medium
+
+    /* Enable DMA request on USART2 TX */
+    USART2->CR3 |= USART_CR3_DMAT;
+
+    /* Enable channel */
+    DMA1_Channel4->CCR |= DMA_CCR_EN;
+}
+
+int main(void) {
+    SystemClock_Config_HSI();
+    uart2_gpio_init();
+    uart2_init(SYSCLK_HZ); // USART2 on APB1 at HSI (simple assumption)
+    dma_usart2_tx_setup();
+
+    /* Wait for DMA transfer complete by polling CNDTR */
+    while (DMA1_Channel4->CNDTR != 0);
+
+    /* Wait for USART TC */
+    while (!(USART2->ISR & USART_ISR_TC));
+    USART2->ICR |= USART_ICR_TCCF;
+
+    while (1) { __WFI(); } // idle
+}

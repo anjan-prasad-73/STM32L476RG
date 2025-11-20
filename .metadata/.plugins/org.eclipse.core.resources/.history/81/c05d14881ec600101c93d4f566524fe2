@@ -1,0 +1,114 @@
+/* 39_Ultrasonic_Test_GPIO.c
+   STM32L476RG - TRIG=PA6 (output), ECHO=PA7 (input), measure pulse width in us using DWT cycle counter.
+   Prints pulse width over USART2 (polling).
+*/
+
+#include "stm32l476xx.h"
+#include <stdint.h>
+
+#define SYSCLK_HZ 16000000U
+
+/* USART2 polling TX (PA2 TX) */
+void uart2_gpio_init(void){
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+    GPIOA->MODER &= ~((3<<4)|(3<<6));
+    GPIOA->MODER |= (2<<4)|(2<<6);
+    GPIOA->AFR[0] &= ~((0xF<<8)|(0xF<<12));
+    GPIOA->AFR[0] |= (7<<8)|(7<<12);
+}
+void uart2_init(uint32_t pclk){
+    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
+    USART2->CR1 = 0;
+    USART2->BRR = (uint32_t)((pclk + (115200/2))/115200);
+    USART2->CR1 |= USART_CR1_TE | USART_CR1_UE;
+    while(!(USART2->ISR & USART_ISR_TEACK));
+}
+int putchar_poll(int ch){
+    while(!(USART2->ISR & USART_ISR_TXE));
+    USART2->TDR = (uint8_t)ch;
+    return ch;
+}
+
+/* DWT microsecond */
+void dwt_init(void){
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
+uint32_t micros(void){
+    return DWT->CYCCNT / (SYSCLK_HZ/1000000U);
+}
+
+/* Ultrasonic GPIO init: TRIG PA6 (output), ECHO PA7 (input) */
+void ultrasonic_gpio_init(void){
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+    /* PA6 output */
+    GPIOA->MODER &= ~(3 << (6*2));
+    GPIOA->MODER |=  (1 << (6*2));
+    /* PA7 input (default) */
+    GPIOA->MODER &= ~(3 << (7*2));
+}
+
+/* Send 10us pulse on TRIG */
+void ultrasonic_trigger_pulse(void){
+    GPIOA->ODR &= ~(1<<6);
+    for(volatile int i=0;i<10;i++) __NOP();
+    GPIOA->ODR |= (1<<6);
+    /* 10 us using DWT delay */
+    uint32_t start = DWT->CYCCNT;
+    uint32_t wait = (SYSCLK_HZ/1000000U) * 10;
+    while ((DWT->CYCCNT - start) < wait);
+    GPIOA->ODR &= ~(1<<6);
+}
+
+/* Measure echo pulse width in microseconds (timeout in us) */
+int32_t ultrasonic_measure_us(uint32_t timeout_us){
+    /* Wait for echo low -> high (start) */
+    uint32_t start_time = DWT->CYCCNT;
+    uint32_t timeout_ticks = (SYSCLK_HZ/1000000U) * timeout_us;
+    /* Wait for rising */
+    while(!(GPIOA->IDR & (1<<7))){
+        if ((DWT->CYCCNT - start_time) > timeout_ticks) return -1;
+    }
+    uint32_t t_rise = DWT->CYCCNT;
+    /* Wait for falling */
+    while((GPIOA->IDR & (1<<7))){
+        if ((DWT->CYCCNT - t_rise) > timeout_ticks) return -2;
+    }
+    uint32_t t_fall = DWT->CYCCNT;
+    uint32_t ticks = t_fall - t_rise;
+    uint32_t us = ticks / (SYSCLK_HZ/1000000U);
+    return (int32_t)us;
+}
+
+void itoa_dec(uint32_t val, char *buf){
+    char tmp[12]; int i=0;
+    if (val==0){ buf[0]='0'; buf[1]=0; return;}
+    while(val){ tmp[i++]= '0' + (val%10); val/=10;}
+    for(int j=0;j<i;j++) buf[j]=tmp[i-1-j];
+    buf[i]=0;
+}
+
+int main(void){
+    /* Inits */
+    dwt_init();
+    uart2_gpio_init();
+    uart2_init(SYSCLK_HZ);
+    ultrasonic_gpio_init();
+
+    while(1){
+        ultrasonic_trigger_pulse();
+        int32_t pulse_us = ultrasonic_measure_us(30000); // 30 ms timeout
+        if (pulse_us > 0){
+            char s[16];
+            itoa_dec((uint32_t)pulse_us, s);
+            for(char *p=s; *p; ++p) putchar_poll(*p);
+            putchar_poll('\r'); putchar_poll('\n');
+        } else {
+            const char *err = (pulse_us == -1) ? "TOUT_START\r\n" : "TOUT_END\r\n";
+            for(const char *p = err; *p; ++p) putchar_poll(*p);
+        }
+        /* wait ~200 ms */
+        for(volatile uint32_t d=0; d<2000000; ++d) __NOP();
+    }
+}

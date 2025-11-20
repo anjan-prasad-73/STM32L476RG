@@ -1,0 +1,99 @@
+#include "stm32l476xx.h"
+#include <string.h>
+
+#define SYSCLK 16000000UL
+const char msg[] = "Hello DMA USART2 TX (DMAMUX request 28)!\r\n";
+
+/* ------------ Enable HSI Clock --------------- */
+void Clock_HSI_Enable(void)
+{
+    RCC->CR |= RCC_CR_HSION;
+    while(!(RCC->CR & RCC_CR_HSIRDY));
+
+    RCC->CFGR &= ~RCC_CFGR_SW;
+    RCC->CFGR |= RCC_CFGR_SW_HSI;
+    while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
+}
+
+/* ------------ USART2 GPIO PA2(TX) PA3(RX) ------------ */
+void USART2_GPIO_Init(void)
+{
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+
+    GPIOA->MODER &= ~((3<<4)|(3<<6));
+    GPIOA->MODER |=  (2<<4)|(2<<6);
+
+    GPIOA->AFR[0] &= ~((0xF<<8)|(0xF<<12));
+    GPIOA->AFR[0] |=  (7<<8)|(7<<12);  // AF7
+}
+
+/* ------------ USART2 INIT ------------ */
+void USART2_Init(void)
+{
+    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
+
+    USART2->CR1 = 0;
+    USART2->BRR = SYSCLK / 115200;
+    USART2->CR1 |= USART_CR1_TE;
+    USART2->CR1 |= USART_CR1_UE;
+
+    while(!(USART2->ISR & USART_ISR_TEACK));
+}
+
+/* ------------ DMAMUX: MAP CH7 TO USART2_TX (28) ------------ */
+void DMAMUX_Channel7_USART2_TX(void)
+{
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMAMUX1EN;
+
+    DMAMUX1_Channel7->CCR = 28;   // USART2_TX Request 28
+}
+
+/* ------------ DMA Channel 7 Setup ------------ */
+void DMA_Channel7_Start(void)
+{
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+
+    DMA1_Channel7->CCR &= ~DMA_CCR_EN;
+
+    DMA1_Channel7->CPAR  = (uint32_t)&USART2->TDR;
+    DMA1_Channel7->CMAR  = (uint32_t)msg;
+    DMA1_Channel7->CNDTR = strlen(msg);
+
+    DMA1_Channel7->CCR = DMA_CCR_MINC | DMA_CCR_DIR | (1<<12);  // medium priority
+
+    USART2->CR3 |= USART_CR3_DMAT;
+
+    DMA1_Channel7->CCR |= DMA_CCR_EN;
+}
+
+/* ------------ Polling Print ------------ */
+void uart_print(char *s) {
+    while(*s) {
+        while(!(USART2->ISR & USART_ISR_TXE));
+        USART2->TDR = *s++;
+    }
+}
+
+/* ------------ MAIN ------------ */
+int main(void)
+{
+    Clock_HSI_Enable();
+    USART2_GPIO_Init();
+    USART2_Init();
+
+    uart_print("UART polling OK\r\n");
+
+    DMAMUX_Channel7_USART2_TX();  // IMPORTANT
+    DMA_Channel7_Start();
+
+    uart_print("DMA started, waiting...\r\n");
+
+    while(DMA1_Channel7->CNDTR != 0);
+
+    while(!(USART2->ISR & USART_ISR_TC));
+    USART2->ICR = USART_ICR_TCCF;
+
+    uart_print("DMA done!\r\n");
+
+    while(1);
+}

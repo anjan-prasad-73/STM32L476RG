@@ -1,0 +1,8 @@
+../Core/Src/main.c:9:6:Clock_HSI_Enable	4	static
+../Core/Src/main.c:19:6:uart2_gpio_init	4	static
+../Core/Src/main.c:31:6:uart2_init	4	static
+../Core/Src/main.c:43:6:uart2_putc_poll	16	static
+../Core/Src/main.c:48:6:uart2_print_poll	16	static
+../Core/Src/main.c:54:6:dma1_cselr_map_ch7_usart2tx	4	static
+../Core/Src/main.c:67:6:dma1_ch7_start_tx	16	static
+../Core/Src/main.c:91:5:main	8	static,ignoring_inline_asm

@@ -1,0 +1,54 @@
+#include "stm32l476xx.h"
+
+void Clock_HSI_Enable(void)
+{
+    RCC->CR |= RCC_CR_HSION;
+    while(!(RCC->CR & RCC_CR_HSIRDY));
+
+    RCC->CFGR &= ~RCC_CFGR_SW;
+    RCC->CFGR |=  RCC_CFGR_SW_HSI;
+
+    while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
+}
+
+void uart2_gpio_init(void)
+{
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+
+    GPIOA->MODER &= ~((3<<4)|(3<<6));
+    GPIOA->MODER |=  (2<<4)|(2<<6);
+
+    GPIOA->AFR[0] &= ~((0xF<<8)|(0xF<<12));
+    GPIOA->AFR[0] |=  (7<<8)|(7<<12);
+}
+
+void uart2_init(void)
+{
+    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
+
+    USART2->CR1 = 0;
+    USART2->BRR = 16000000/115200;   // NOW CORRECT because HSI is active
+    USART2->CR1 |= USART_CR1_TE | USART_CR1_UE;
+
+    while(!(USART2->ISR & USART_ISR_TEACK));
+}
+
+void uart2_write(char c)
+{
+    while(!(USART2->ISR & USART_ISR_TXE));
+    USART2->TDR = c;
+}
+
+int main(void)
+{
+    Clock_HSI_Enable();   // <--- FIX CLOCK FIRST
+
+    uart2_gpio_init();
+    uart2_init();
+
+    while(1)
+    {
+        uart2_write('A');
+        for(volatile int i=0;i<50000;i++);
+    }
+}

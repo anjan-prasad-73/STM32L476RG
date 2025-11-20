@@ -1,0 +1,61 @@
+/* 38_Timers_BareMetal.c
+   STM32L476RG - TIM2 generates 1 ms periodic interrupt; toggles PA5 in ISR.
+*/
+
+#include "stm32l476xx.h"
+#include <stdint.h>
+#define SYSCLK_HZ 16000000U
+
+volatile uint32_t tim2_ms = 0;
+
+void SystemClock_Config_HSI(void){
+    RCC->CR |= RCC_CR_HSION;
+    while(!(RCC->CR & RCC_CR_HSIRDY));
+    RCC->CFGR &= ~RCC_CFGR_SW;
+    RCC->CFGR |= RCC_CFGR_SW_HSI;
+    while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
+}
+
+void gpio_pa5_init(void){
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+    GPIOA->MODER &= ~(3 << (5*2));
+    GPIOA->MODER |=  (1 << (5*2)); // output
+    GPIOA->OTYPER &= ~(1<<5);
+    GPIOA->OSPEEDR |= (3 << (5*2));
+}
+
+void tim2_init_1ms(void){
+    /* TIM2 clock enable */
+    RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;
+
+    /* We want 1kHz update -> period = 1ms.
+       If TIM_CLK = SYSCLK_HZ: choose PSC so that (PSC+1) = SYSCLK/1000, ARR = 1 (or ARR=999 & PSC=SYSCLK/1000-1)
+    */
+    uint32_t presc = (SYSCLK_HZ/1000U) - 1;
+    if (presc > 0xFFFF) presc = 0xFFFF;
+    TIM2->PSC = (uint16_t)presc;
+    TIM2->ARR = 1 - 1; // update every (PSC+1)*(ARR+1) ticks
+    TIM2->DIER |= TIM_DIER_UIE;
+    TIM2->CR1 |= TIM_CR1_CEN;
+
+    NVIC_SetPriority(TIM2_IRQn, 2);
+    NVIC_EnableIRQ(TIM2_IRQn);
+}
+
+void TIM2_IRQHandler(void){
+    if (TIM2->SR & TIM_SR_UIF){
+        TIM2->SR &= ~TIM_SR_UIF;
+        tim2_ms++;
+        GPIOA->ODR ^= (1<<5); // toggle PA5
+    }
+}
+
+int main(void){
+    SystemClock_Config_HSI();
+    gpio_pa5_init();
+    tim2_init_1ms();
+
+    while(1){
+        __WFI();
+    }
+}

@@ -1,0 +1,86 @@
+#include "stm32l476xx.h"
+#include <string.h>
+
+#define SYSCLK_HZ 16000000U
+const char msg[] = "Hello from STM32L476RG UART2 DMA!\r\n";
+
+/* -------------------- CLOCK: HSI ENABLE -------------------- */
+void Clock_HSI_Enable(void)
+{
+    RCC->CR |= RCC_CR_HSION;                        // enable HSI16
+    while(!(RCC->CR & RCC_CR_HSIRDY));              // wait ready
+
+    RCC->CFGR &= ~RCC_CFGR_SW;                      // clear SW bits
+    RCC->CFGR |=  RCC_CFGR_SW_HSI;                  // select HSI
+
+    while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);  // wait
+}
+
+/* -------------------- GPIO FOR USART2 -------------------- */
+void uart2_gpio_init(void)
+{
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;            // enable GPIOA
+
+    GPIOA->MODER &= ~((3<<4)|(3<<6));               // clear PA2,PA3
+    GPIOA->MODER |=  (2<<4)|(2<<6);                 // AF mode
+
+    GPIOA->AFR[0] &= ~((0xF<<8)|(0xF<<12));         // clear AF
+    GPIOA->AFR[0] |=  (7<<8) | (7<<12);             // AF7 = USART2
+}
+
+/* -------------------- USART2 INIT -------------------- */
+void uart2_init(void)
+{
+    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
+
+    USART2->CR1 = 0;
+    USART2->BRR = SYSCLK_HZ / 115200;               // correct because HSI=16MHz
+    USART2->CR1 |= USART_CR1_TE;                    // TX enable
+    USART2->CR1 |= USART_CR1_UE;                    // USART enable
+
+    while(!(USART2->ISR & USART_ISR_TEACK));        // wait TX ready
+}
+
+/* -------------------- DMA FOR USART2_TX -------------------- */
+void dma_usart2_tx_init(void)
+{
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;             // DMA1 clk enable
+
+    DMA1_Channel4->CCR &= ~DMA_CCR_EN;              // disable channel
+    while(DMA1_Channel4->CCR & DMA_CCR_EN);         // wait
+
+    DMA1_Channel4->CPAR  = (uint32_t)&USART2->TDR;  // USART2 data reg
+    DMA1_Channel4->CMAR  = (uint32_t)msg;           // message buffer
+    DMA1_Channel4->CNDTR = strlen(msg);             // number of bytes
+
+    DMA1_Channel4->CCR = 0;
+    DMA1_Channel4->CCR |= DMA_CCR_MINC;             // memory increment
+    DMA1_Channel4->CCR |= (1 << 4);                  // DIR = memory→periph
+    DMA1_Channel4->CCR |= (1 << 12);                 // priority medium
+
+    USART2->CR3 |= USART_CR3_DMAT;                  // enable USART DMA TX
+
+    DMA1_Channel4->CCR |= DMA_CCR_EN;               // start DMA
+}
+
+/* ------------------------------------------------------------ */
+int main(void)
+{
+    Clock_HSI_Enable();     // 🔥 THE MOST IMPORTANT PART
+    uart2_gpio_init();
+    uart2_init();
+
+    dma_usart2_tx_init();   // start DMA transfer
+
+    /* wait until DMA moves all data to USART */
+    while(DMA1_Channel4->CNDTR != 0);
+
+    /* wait until USART finishes last byte */
+    while(!(USART2->ISR & USART_ISR_TC));
+    USART2->ICR |= USART_ICR_TCCF;   // clear TC
+
+    while(1)
+    {
+        __WFI();    // low power mode
+    }
+}

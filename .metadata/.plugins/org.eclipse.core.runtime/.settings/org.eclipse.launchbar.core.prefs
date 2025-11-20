@@ -35,6 +35,16 @@ org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:20_SPI_Driver\ (1)/activeLaunch
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:20_SPI_Driver/activeLaunchMode=run
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:21_SPI_DRIVER_Interrupt\ Debug/activeLaunchMode=debug
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:22_I2C_Driver\ Debug/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:35_UART_DMA_Baremetal\ Debug/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:35_UART_DMA_Baremetal/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:35_UART_DMA_Baremetal/activeLaunchTarget=null\:---
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:36_ADC_Baremetal/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:37_Systick_Baremetal\ Debug/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:37_Systick_Baremetal/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:38_Timers_Baremetal\ Debug/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:38_Timers_Baremetal/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:39_Ultrasonic_test_Baremetal\ Debug/activeLaunchMode=debug
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:39_Ultrasonic_test_Baremetal/activeLaunchMode=run
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:ex/activeLaunchMode=debug
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:ex/activeLaunchTarget=null\:---
 org.eclipse.launchbar.core.descriptorType.default\:18_GPIO_Driver\ Debug/activeLaunchMode=debug

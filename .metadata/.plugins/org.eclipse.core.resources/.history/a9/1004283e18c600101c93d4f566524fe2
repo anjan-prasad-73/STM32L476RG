@@ -1,0 +1,115 @@
+/* 35_UART_DMA_BareMetal_DMA1_CH7.c
+   STM32L476RG - Uses HSI=16MHz, USART2 (PA2 TX), DMA1 Channel7 for USART2_TX.
+   Assumes Nucleo-L476RG (ST-LINK VCP on PA2/PA3).
+*/
+
+#include "stm32l476xx.h"
+#include <string.h>
+
+#define SYSCLK_HZ 16000000U
+const char msg[] = "Hello from STM32L476RG UART2 DMA (CH7)!\r\n";
+
+/* ---------- Clock: force HSI ---------- */
+void Clock_HSI_Enable(void)
+{
+    RCC->CR |= RCC_CR_HSION;                       // enable HSI16
+    while(!(RCC->CR & RCC_CR_HSIRDY));
+    RCC->CFGR &= ~RCC_CFGR_SW;
+    RCC->CFGR |= RCC_CFGR_SW_HSI;                  // switch to HSI
+    while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
+}
+
+/* ---------- USART2 GPIO (PA2/PA3 AF7) ---------- */
+void uart2_gpio_init(void)
+{
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+    GPIOA->MODER &= ~((3<<4)|(3<<6));
+    GPIOA->MODER |=  (2<<4)|(2<<6);   // AF
+    GPIOA->AFR[0] &= ~((0xF<<8)|(0xF<<12));
+    GPIOA->AFR[0] |=  (7<<8)|(7<<12); // AF7 = USART2
+}
+
+/* ---------- USART2 init (115200) ---------- */
+void uart2_init(void)
+{
+    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
+    USART2->CR1 = 0;
+    USART2->BRR = SYSCLK_HZ / 115200U;   // correct if HSI active
+    USART2->CR3 = 0;
+    USART2->CR1 |= USART_CR1_TE;
+    USART2->CR1 |= USART_CR1_UE;
+    while(!(USART2->ISR & USART_ISR_TEACK));
+}
+
+/* ---------- DMA1 Channel7 setup for USART2 TX ---------- */
+void dma_usart2_tx_ch7_start(void)
+{
+    /* Enable DMA1 clock */
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+
+    /* Disable channel7 before config */
+    DMA1_Channel7->CCR &= ~DMA_CCR_EN;
+    while (DMA1_Channel7->CCR & DMA_CCR_EN);
+
+    /* Peripheral address = USART2 TDR */
+    DMA1_Channel7->CPAR = (uint32_t)&(USART2->TDR);
+
+    /* Memory address = msg */
+    DMA1_Channel7->CMAR = (uint32_t)msg;
+
+    /* Number of items */
+    DMA1_Channel7->CNDTR = (uint32_t)strlen(msg);
+
+    /* Configure: memory increment, DIR = memory->peripheral, 8-bit sizes, medium priority */
+    DMA1_Channel7->CCR = 0;
+    DMA1_Channel7->CCR |= DMA_CCR_MINC;            // memory increment
+    DMA1_Channel7->CCR |= (1 << 4);                // DIR = 1 -> memory to peripheral
+    DMA1_Channel7->CCR |= (1 << 12);               // medium priority
+    /* PSIZE/MSIZE = 00 -> 8-bit (default) */
+
+    /* Enable USART2 DMA request for TX */
+    USART2->CR3 |= USART_CR3_DMAT;
+
+    /* Enable the DMA channel (transfer will start when USART requests) */
+    DMA1_Channel7->CCR |= DMA_CCR_EN;
+}
+
+/* ---------- Helper: print status over UART (polling) ---------- */
+void uart2_putc_poll(char c)
+{
+    while(!(USART2->ISR & USART_ISR_TXE));
+    USART2->TDR = (uint8_t)c;
+}
+void uart2_print_poll(const char *s)
+{
+    while(*s) uart2_putc_poll(*s++);
+}
+
+/* ---------- main ---------- */
+int main(void)
+{
+    Clock_HSI_Enable();            // ensure BRR correct
+    uart2_gpio_init();
+    uart2_init();
+
+    /* Small sanity message (polling) so we know USART works now */
+    uart2_print_poll("UART polling OK\r\n");
+
+    /* Start DMA transfer on Channel7 */
+    dma_usart2_tx_ch7_start();
+
+    /* Wait (poll) until DMA finished moving bytes (CNDTR==0) */
+    /* Also print a small status before/after so you can see */
+    uart2_print_poll("DMA transfer started, waiting CNDTR->0...\r\n");
+
+    /* Poll CNDTR */
+    while (DMA1_Channel7->CNDTR != 0);
+
+    /* Wait for USART transfer complete (last byte shifted out) */
+    while(!(USART2->ISR & USART_ISR_TC));
+    USART2->ICR |= USART_ICR_TCCF;
+
+    uart2_print_poll("DMA transfer complete\r\n");
+
+    while (1) __WFI();
+}
