@@ -1,0 +1,47 @@
+/* 44_Simple_Tasks_Creation_FreeRTOS/main.c */
+
+#include "stm32l4xx_hal.h"
+#include "FreeRTOS.h"
+#include "task.h"
+
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+
+void vLedTask1(void *pvParameters);
+void vLedTask2(void *pvParameters);
+
+int main(void)
+{
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+
+    xTaskCreate(vLedTask1, "LED1", 128, NULL, 1, NULL);
+    xTaskCreate(vLedTask2, "LED2", 128, NULL, 1, NULL);
+
+    vTaskStartScheduler();
+
+    while (1)
+    {
+    }
+}
+
+void vLedTask1(void *pvParameters)
+{
+    (void)pvParameters;
+    for(;;)
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        vTaskDelay(pdMS_TO_TICKS(500));   // 500 ms
+    }
+}
+
+void vLedTask2(void *pvParameters)
+{
+    (void)pvParameters;
+    for(;;)
+    {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        vTaskDelay(pdMS_TO_TICKS(200));   // 200 ms
+    }
+}

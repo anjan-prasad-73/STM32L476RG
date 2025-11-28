@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;52_Binary_Semaphore_FreeRTOS/51_Queue_Management_FreeRTOS.ioc&apos; to &apos;52_Binary_Semaphore_FreeRTOS.ioc&apos;" description="Rename resource &apos;51_Queue_Management_FreeRTOS.ioc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="51_Queue_Management_FreeRTOS.ioc" name="52_Binary_Semaphore_FreeRTOS.ioc" stamp="1764254123273" updateReferences="true"/>
+</session>

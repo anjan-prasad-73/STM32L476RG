@@ -1,0 +1,204 @@
+#include "main.h"
+#include "string.h"
+#include "stdio.h"
+#include "stdarg.h"
+
+/* --- Pin Defines (change if required) --- */
+#define TRIG_GPIO_PORT GPIOA
+#define TRIG_PIN       GPIO_PIN_1
+
+#define ECHO_TIM       htim2
+#define ECHO_TIM_CH    TIM_CHANNEL_1
+
+#define USER_BUTTON_GPIO_PORT GPIOC
+#define USER_BUTTON_PIN       GPIO_PIN_13
+
+/* FLASH LOG AREA: STM32F407 — Sector 11 (last sector) */
+#define FLASH_LOG_START_ADDR  ((uint32_t)0x080E0000)   // Sector 11 start
+#define FLASH_SECTOR_TO_ERASE FLASH_SECTOR_11
+
+/* External handles */
+extern UART_HandleTypeDef huart2;
+extern TIM_HandleTypeDef htim2;
+
+/* Globals for IC */
+volatile uint32_t ic_rising = 0;
+volatile uint32_t ic_falling = 0;
+volatile uint8_t  ic_ready = 0;
+
+uint32_t flash_write_ptr = FLASH_LOG_START_ADDR;
+
+/* ------------------------------------------------------------------ */
+/* UART printf helper */
+int uart_printf(const char *fmt, ...)
+{
+    char buf[200];
+    va_list ap;
+    va_start(ap, fmt);
+    int len = vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    HAL_UART_Transmit(&huart2, (uint8_t*)buf, len, HAL_MAX_DELAY);
+    return len;
+}
+
+/* ------------------------------------------------------------------ */
+/* TIM2 Input Capture Callback */
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2)
+    {
+        uint32_t val = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+
+        if (ic_ready == 0) {
+            ic_rising = val;
+            ic_ready = 1;
+        } else {
+            ic_falling = val;
+            ic_ready = 2;
+        }
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Button EXTI */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == USER_BUTTON_PIN)
+    {
+        float dist = measure_distance_cm();
+        char line[100];
+        sprintf(line, "Distance = %.2f cm\r\n", dist);
+
+        uart_printf("%s", line);
+        flash_append_line(line);
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Ultrasonic trigger pulse */
+void trigger_ultrasonic(void)
+{
+    HAL_GPIO_WritePin(TRIG_GPIO_PORT, TRIG_PIN, GPIO_PIN_RESET);
+    HAL_Delay(2);
+
+    HAL_GPIO_WritePin(TRIG_GPIO_PORT, TRIG_PIN, GPIO_PIN_SET);
+    for (volatile int i = 0; i < 150; i++);  // ~10us delay
+    HAL_GPIO_WritePin(TRIG_GPIO_PORT, TRIG_PIN, GPIO_PIN_RESET);
+}
+
+/* ------------------------------------------------------------------ */
+/* Measure pulse width using input capture */
+uint32_t measure_pulse_width_us(void)
+{
+    ic_ready = 0;
+
+    /* Configure rising edge */
+    TIM_IC_InitTypeDef sConfigIC;
+    sConfigIC.ICPolarity  = TIM_INPUTCHANNELPOLARITY_RISING;
+    sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+    sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+    sConfigIC.ICFilter    = 0;
+    HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1);
+
+    __HAL_TIM_SET_COUNTER(&htim2, 0);
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+
+    trigger_ultrasonic();
+
+    uint32_t t = HAL_GetTick();
+    while (ic_ready == 0)
+        if (HAL_GetTick() - t > 100) return 0;
+
+    /* Change to falling edge */
+    HAL_TIM_IC_Stop_IT(&htim2, TIM_CHANNEL_1);
+    sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+    HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1);
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+
+    t = HAL_GetTick();
+    while (ic_ready != 2)
+        if (HAL_GetTick() - t > 100) return 0;
+
+    HAL_TIM_IC_Stop_IT(&htim2, TIM_CHANNEL_1);
+
+    return (ic_falling > ic_rising) ?
+           (ic_falling - ic_rising) : (0xFFFF - ic_rising + ic_falling);
+}
+
+/* ------------------------------------------------------------------ */
+/* Distance calculation */
+float measure_distance_cm(void)
+{
+    uint32_t us = measure_pulse_width_us();
+    if (us == 0) return -1;
+    return (us * 0.0343f) / 2.0f;
+}
+
+/* ------------------------------------------------------------------ */
+/* FLASH logging */
+int flash_append_line(char *line)
+{
+    HAL_FLASH_Unlock();
+
+    /* Erase sector only once at beginning */
+    if (flash_write_ptr == FLASH_LOG_START_ADDR)
+    {
+        FLASH_EraseInitTypeDef Erase;
+        uint32_t err;
+
+        Erase.TypeErase     = FLASH_TYPEERASE_SECTORS;
+        Erase.Sector        = FLASH_SECTOR_TO_ERASE;
+        Erase.NbSectors     = 1;
+        Erase.VoltageRange  = FLASH_VOLTAGE_RANGE_3;
+
+        if (HAL_FLASHEx_Erase(&Erase, &err) != HAL_OK)
+        {
+            HAL_FLASH_Lock();
+            return -1;
+        }
+    }
+
+    /* Write bytes as 32-bit words */
+    uint32_t len = strlen(line);
+    uint8_t *p = (uint8_t*)line;
+
+    for (uint32_t i = 0; i < len; i += 4)
+    {
+        uint32_t w = 0xFFFFFFFF;
+
+        for (int b = 0; b < 4; b++)
+        {
+            if (i + b < len)
+                ((uint8_t*)&w)[b] = p[i + b];
+        }
+
+        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, flash_write_ptr, w) != HAL_OK)
+        {
+            HAL_FLASH_Lock();
+            return -1;
+        }
+
+        flash_write_ptr += 4;
+    }
+
+    HAL_FLASH_Lock();
+    return 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* MAIN */
+int main(void)
+{
+    HAL_Init();
+    SystemClock_Config();
+
+    MX_GPIO_Init();
+    MX_USART2_UART_Init();
+    MX_TIM2_Init();
+
+    uart_printf("System Ready. Press Button.\r\n");
+
+    while (1)
+    {
+    }
+}

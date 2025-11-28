@@ -1,0 +1,9 @@
+../Core/Src/main.c:21:5:main	16	static
+../Core/Src/main.c:41:6:vSafePrint	16	static
+../Core/Src/main.c:50:6:vPrintTask1	16	static
+../Core/Src/main.c:60:6:vPrintTask2	16	static
+../Core/Src/main.c:70:6:SystemClock_Config	96	static
+../Core/Src/main.c:120:13:MX_USART2_UART_Init	8	static
+../Core/Src/main.c:155:13:MX_GPIO_Init	40	static
+../Core/Src/main.c:188:6:StartDefaultTask	16	static
+../Core/Src/main.c:203:6:Error_Handler	4	static,ignoring_inline_asm

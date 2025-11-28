@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;40_Internal_Flash_with_Ultrasonic/39_Ultrasonic_test_Baremetal.ioc&apos; to &apos;40_Internal_Flash_with_Ultrasonic.ioc&apos;" description="Rename resource &apos;39_Ultrasonic_test_Baremetal.ioc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="39_Ultrasonic_test_Baremetal.ioc" name="40_Internal_Flash_with_Ultrasonic.ioc" stamp="1764255225784" updateReferences="true"/>
+</session>

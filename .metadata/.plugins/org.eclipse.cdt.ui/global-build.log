@@ -1,21 +1,49 @@
-20:08:15 **** Incremental Build of configuration Debug for project 39_Ultrasonic_test_Baremetal ****
+20:19:43 **** Incremental Build of configuration Debug for project 54_Mutex_FreeRTOS ****
 make -j8 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L476xx -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
-arm-none-eabi-gcc -o "39_Ultrasonic_test_Baremetal.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\39_Ultrasonic_test_Baremetal\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="39_Ultrasonic_test_Baremetal.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: 39_Ultrasonic_test_Baremetal.elf
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L476xx -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'vSafePrint':
+../Core/Src/main.c:45:51: warning: implicit declaration of function 'strlen' [-Wimplicit-function-declaration]
+   45 |         HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+      |                                                   ^~~~~~
+../Core/Src/main.c:8:1: note: include '<string.h>' or provide a declaration of 'strlen'
+    7 | #include "semphr.h"
+  +++ |+#include <string.h>
+    8 | UART_HandleTypeDef huart2;
+../Core/Src/main.c:45:51: warning: incompatible implicit declaration of built-in function 'strlen' [-Wbuiltin-declaration-mismatch]
+   45 |         HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+      |                                                   ^~~~~~
+../Core/Src/main.c:45:51: note: include '<string.h>' or provide a declaration of 'strlen'
+../Core/Src/main.c: In function 'SystemClock_Config':
+../Core/Src/main.c:79:5: warning: implicit declaration of function 'Error_Handler' [-Wimplicit-function-declaration]
+   79 |     Error_Handler();
+      |     ^~~~~~~~~~~~~
+../Core/Src/main.c: In function 'StartDefaultTask':
+../Core/Src/main.c:194:5: warning: implicit declaration of function 'osDelay'; did you mean 'vTaskDelay'? [-Wimplicit-function-declaration]
+  194 |     osDelay(1);
+      |     ^~~~~~~
+      |     vTaskDelay
+../Core/Src/main.c: At top level:
+../Core/Src/main.c:203:6: warning: conflicting types for 'Error_Handler'; have 'void(void)'
+  203 | void Error_Handler(void)
+      |      ^~~~~~~~~~~~~
+../Core/Src/main.c:79:5: note: previous implicit declaration of 'Error_Handler' with type 'void(void)'
+   79 |     Error_Handler();
+      |     ^~~~~~~~~~~~~
+arm-none-eabi-gcc -o "54_Mutex_FreeRTOS.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\54_Mutex_FreeRTOS\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="54_Mutex_FreeRTOS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: 54_Mutex_FreeRTOS.elf
  
-arm-none-eabi-size  39_Ultrasonic_test_Baremetal.elf 
-arm-none-eabi-objdump -h -S 39_Ultrasonic_test_Baremetal.elf  > "39_Ultrasonic_test_Baremetal.list"
+arm-none-eabi-size  54_Mutex_FreeRTOS.elf 
+arm-none-eabi-objdump -h -S 54_Mutex_FreeRTOS.elf  > "54_Mutex_FreeRTOS.list"
    text	   data	    bss	    dec	    hex	filename
-   1888	      4	   1572	   3464	    d88	39_Ultrasonic_test_Baremetal.elf
+  24724	     16	   8112	  32852	   8054	54_Mutex_FreeRTOS.elf
 Finished building: default.size.stdout
-Finished building: 39_Ultrasonic_test_Baremetal.list
  
+Finished building: 54_Mutex_FreeRTOS.list
  
-20:08:25 **** Incremental Build of configuration Debug for project 39_Ultrasonic_test_Baremetal ****
+20:20:05 **** Incremental Build of configuration Debug for project 54_Mutex_FreeRTOS ****
 make -j8 all 
-arm-none-eabi-size  39_Ultrasonic_test_Baremetal.elf 
+arm-none-eabi-size  54_Mutex_FreeRTOS.elf 
    text	   data	    bss	    dec	    hex	filename
-   1888	      4	   1572	   3464	    d88	39_Ultrasonic_test_Baremetal.elf
+  24724	     16	   8112	  32852	   8054	54_Mutex_FreeRTOS.elf
 Finished building: default.size.stdout
  

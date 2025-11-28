@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;48_Task_NotificatonValue_FreeRTOS/47_Task_Delay_FreeRTOS.ioc&apos; to &apos;48_Task_NotificatonValue_FreeRTOS.ioc&apos;" description="Rename resource &apos;47_Task_Delay_FreeRTOS.ioc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="47_Task_Delay_FreeRTOS.ioc" name="48_Task_NotificatonValue_FreeRTOS.ioc" stamp="1764251311220" updateReferences="true"/>
+</session>

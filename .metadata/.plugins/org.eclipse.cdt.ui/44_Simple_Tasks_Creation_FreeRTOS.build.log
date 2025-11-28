@@ -1,0 +1,36 @@
+18:57:44 **** Incremental Build of configuration Debug for project 44_Simple_Tasks_Creation_FreeRTOS ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L476xx -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'SystemClock_Config':
+../Core/Src/main.c:59:5: warning: implicit declaration of function 'Error_Handler' [-Wimplicit-function-declaration]
+   59 |     Error_Handler();
+      |     ^~~~~~~~~~~~~
+../Core/Src/main.c: In function 'StartDefaultTask':
+../Core/Src/main.c:174:5: warning: implicit declaration of function 'osDelay'; did you mean 'vTaskDelay'? [-Wimplicit-function-declaration]
+  174 |     osDelay(1);
+      |     ^~~~~~~
+      |     vTaskDelay
+../Core/Src/main.c: At top level:
+../Core/Src/main.c:183:6: warning: conflicting types for 'Error_Handler'; have 'void(void)'
+  183 | void Error_Handler(void)
+      |      ^~~~~~~~~~~~~
+../Core/Src/main.c:59:5: note: previous implicit declaration of 'Error_Handler' with type 'void(void)'
+   59 |     Error_Handler();
+      |     ^~~~~~~~~~~~~
+../Core/Src/main.c:100:13: warning: 'MX_USART2_UART_Init' defined but not used [-Wunused-function]
+  100 | static void MX_USART2_UART_Init(void)
+      |             ^~~~~~~~~~~~~~~~~~~
+arm-none-eabi-gcc -o "44_Simple_Tasks_Creation_FreeRTOS.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\44_Simple_Tasks_Creation_FreeRTOS\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="44_Simple_Tasks_Creation_FreeRTOS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: 44_Simple_Tasks_Creation_FreeRTOS.elf
+ 
+arm-none-eabi-size  44_Simple_Tasks_Creation_FreeRTOS.elf 
+arm-none-eabi-objdump -h -S 44_Simple_Tasks_Creation_FreeRTOS.elf  > "44_Simple_Tasks_Creation_FreeRTOS.list"
+   text	   data	    bss	    dec	    hex	filename
+  16732	     16	   7976	  24724	   6094	44_Simple_Tasks_Creation_FreeRTOS.elf
+Finished building: default.size.stdout
+ 
+Finished building: 44_Simple_Tasks_Creation_FreeRTOS.list
+ 
+
+18:57:48 Build Finished. 0 errors, 4 warnings. (took 4s.183ms)
+

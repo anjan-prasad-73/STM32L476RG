@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;51_Queue_Management_FreeRTOS/50_Idle_Task_Hook_FreeRTOS.ioc&apos; to &apos;51_Queue_Management_FreeRTOS.ioc&apos;" description="Rename resource &apos;50_Idle_Task_Hook_FreeRTOS.ioc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="50_Idle_Task_Hook_FreeRTOS.ioc" name="51_Queue_Management_FreeRTOS.ioc" stamp="1764253230717" updateReferences="true"/>
+</session>

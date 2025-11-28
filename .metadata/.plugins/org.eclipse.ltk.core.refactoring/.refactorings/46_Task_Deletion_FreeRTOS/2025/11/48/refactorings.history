@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;46_Task_Deletion_FreeRTOS/45_LedTask_UserButtionTask_Test_FreeRTOS.ioc&apos; to &apos;46_Task_Deletion_FreeRTOS.ioc&apos;" description="Rename resource &apos;45_LedTask_UserButtionTask_Test_FreeRTOS.ioc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="45_LedTask_UserButtionTask_Test_FreeRTOS.ioc" name="46_Task_Deletion_FreeRTOS.ioc" stamp="1764250558493" updateReferences="true"/>
+</session>
