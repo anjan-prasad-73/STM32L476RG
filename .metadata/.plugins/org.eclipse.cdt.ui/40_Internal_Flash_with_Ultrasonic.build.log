@@ -1,0 +1,49 @@
+11:14:13 **** Incremental Build of configuration Debug for project 40_Internal_Flash_with_Ultrasonic ****
+make -j8 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L476xx -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+In file included from ../Core/Inc/stm32l4xx_hal_conf.h:442,
+                 from ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:29,
+                 from ../Core/Inc/main.h:30,
+                 from ../Core/Src/main.c:1:
+../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim.h:1004: warning: "TIM_OCMODE_ASSYMETRIC_PWM1" redefined
+ 1004 | #define TIM_OCMODE_ASSYMETRIC_PWM1         (TIM_CCMR1_OC1M_3 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2)  /*!< Asymmetric PWM mode 1                  */
+      | 
+In file included from ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_def.h:30,
+                 from ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rcc.h:27,
+                 from ../Core/Inc/stm32l4xx_hal_conf.h:258:
+../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h:4258: note: this is the location of the previous definition
+ 4258 | #define TIM_OCMODE_ASSYMETRIC_PWM1      TIM_OCMODE_ASYMMETRIC_PWM1
+      | 
+../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim.h:1005: warning: "TIM_OCMODE_ASSYMETRIC_PWM2" redefined
+ 1005 | #define TIM_OCMODE_ASSYMETRIC_PWM2         TIM_CCMR1_OC1M                                            /*!< Asymmetric PWM mode 2                  */
+      | 
+../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h:4259: note: this is the location of the previous definition
+ 4259 | #define TIM_OCMODE_ASSYMETRIC_PWM2      TIM_OCMODE_ASYMMETRIC_PWM2
+      | 
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:67:5: warning: implicit declaration of function 'SystemClock_Config'; did you mean 'SysTick_Config'? [-Wimplicit-function-declaration]
+   67 |     SystemClock_Config();
+      |     ^~~~~~~~~~~~~~~~~~
+      |     SysTick_Config
+../Core/Src/main.c:68:5: warning: implicit declaration of function 'MX_GPIO_Init'; did you mean 'HAL_GPIO_Init'? [-Wimplicit-function-declaration]
+   68 |     MX_GPIO_Init();
+      |     ^~~~~~~~~~~~
+      |     HAL_GPIO_Init
+../Core/Src/main.c:69:5: warning: implicit declaration of function 'MX_USART2_UART_Init' [-Wimplicit-function-declaration]
+   69 |     MX_USART2_UART_Init();
+      |     ^~~~~~~~~~~~~~~~~~~
+../Core/Src/main.c:70:5: warning: implicit declaration of function 'MX_TIM2_Init' [-Wimplicit-function-declaration]
+   70 |     MX_TIM2_Init();
+      |     ^~~~~~~~~~~~
+arm-none-eabi-gcc -o "40_Internal_Flash_with_Ultrasonic.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\40_Internal_Flash_with_Ultrasonic\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="40_Internal_Flash_with_Ultrasonic.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+C:/ST/STM32CubeIDE_1.19.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/bin/ld.exe: ./Core/Src/main.o: in function `main':
+D:/BITSILICA_WORKSHEETS/STM32L476RG/40_Internal_Flash_with_Ultrasonic/Debug/../Core/Src/main.c:67:(.text.main+0xa): undefined reference to `SystemClock_Config'
+C:/ST/STM32CubeIDE_1.19.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/bin/ld.exe: D:/BITSILICA_WORKSHEETS/STM32L476RG/40_Internal_Flash_with_Ultrasonic/Debug/../Core/Src/main.c:68:(.text.main+0xe): undefined reference to `MX_GPIO_Init'
+C:/ST/STM32CubeIDE_1.19.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/bin/ld.exe: D:/BITSILICA_WORKSHEETS/STM32L476RG/40_Internal_Flash_with_Ultrasonic/Debug/../Core/Src/main.c:69:(.text.main+0x12): undefined reference to `MX_USART2_UART_Init'
+C:/ST/STM32CubeIDE_1.19.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/bin/ld.exe: D:/BITSILICA_WORKSHEETS/STM32L476RG/40_Internal_Flash_with_Ultrasonic/Debug/../Core/Src/main.c:70:(.text.main+0x16): undefined reference to `MX_TIM2_Init'
+collect2.exe: error: ld returned 1 exit status
+make: *** [makefile:64: 40_Internal_Flash_with_Ultrasonic.elf] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+
+11:14:17 Build Failed. 5 errors, 6 warnings. (took 4s.762ms)
+

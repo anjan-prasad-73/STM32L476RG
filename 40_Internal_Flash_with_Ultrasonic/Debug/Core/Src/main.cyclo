@@ -1,12 +1,4 @@
-../Core/Src/main.c:9:6:Clock_HSI_Enable	3
-../Core/Src/main.c:21:6:uart2_gpio_init	1
-../Core/Src/main.c:33:6:uart2_init	2
-../Core/Src/main.c:43:6:uart2_putc	2
-../Core/Src/main.c:49:6:uart2_print	2
-../Core/Src/main.c:55:6:dwt_init	1
-../Core/Src/main.c:62:10:micros	1
-../Core/Src/main.c:68:6:ultrasonic_gpio_init	1
-../Core/Src/main.c:80:6:trigger_pulse	3
-../Core/Src/main.c:95:9:measure_echo_us	5
-../Core/Src/main.c:114:6:itoa_dec	4
-../Core/Src/main.c:124:5:main	3
+../Core/Src/main.c:14:6:delay	2
+../Core/Src/main.c:20:6:HAL_TIM_IC_CaptureCallback	3
+../Core/Src/main.c:45:6:Flash_Write	1
+../Core/Src/main.c:64:5:main	1

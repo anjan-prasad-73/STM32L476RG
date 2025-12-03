@@ -1,154 +1,88 @@
-#include "stm32l476xx.h"
-#include <stdint.h>
+#include "main.h"
+#include <stdio.h>
+#include<string.h>
 
-#define SYSCLK_HZ 16000000U
+UART_HandleTypeDef huart2;
+TIM_HandleTypeDef htim2;
 
-volatile uint32_t ms_ticks = 0;
+uint32_t IC_Val1, IC_Val2;
+uint8_t Is_First_Captured = 0;
+uint32_t Distance;
 
-/* ----------- Fix UART Clock: Switch to HSI 16 MHz ----------- */
-void Clock_HSI_Enable(void)
+#define FLASH_ADDR 0x080E0000
+
+void delay(uint16_t us)
 {
-    RCC->CR |= RCC_CR_HSION;
-    while(!(RCC->CR & RCC_CR_HSIRDY));
-
-    RCC->CFGR &= ~RCC_CFGR_SW;
-    RCC->CFGR |=  RCC_CFGR_SW_HSI;
-
-    while((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSI);
+    __HAL_TIM_SET_COUNTER(&htim2,0);
+    while(__HAL_TIM_GET_COUNTER(&htim2) < us);
 }
 
-/* ----------- UART2 GPIO (PA2 TX) ----------- */
-void uart2_gpio_init(void)
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
-
-    GPIOA->MODER &= ~((3<<4)|(3<<6));
-    GPIOA->MODER |=  (2<<4)|(2<<6);
-
-    GPIOA->AFR[0] &= ~((0xF<<8)|(0xF<<12));
-    GPIOA->AFR[0] |=  (7<<8)|(7<<12);
-}
-
-/* ----------- UART2 Init ----------- */
-void uart2_init(void)
-{
-    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
-    USART2->CR1 = 0;
-    USART2->BRR = SYSCLK_HZ / 115200;     // CORRECT NOW
-    USART2->CR1 |= USART_CR1_TE | USART_CR1_UE;
-
-    while(!(USART2->ISR & USART_ISR_TEACK));
-}
-
-void uart2_putc(char c)
-{
-    while(!(USART2->ISR & USART_ISR_TXE));
-    USART2->TDR = c;
-}
-
-void uart2_print(char *s)
-{
-    while(*s) uart2_putc(*s++);
-}
-
-/* ----------- DWT microsecond functions ----------- */
-void dwt_init(void)
-{
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    DWT->CYCCNT = 0;
-    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-}
-
-uint32_t micros(void)
-{
-    return (DWT->CYCCNT / (SYSCLK_HZ/1000000));
-}
-
-/* ----------- Ultrasonic GPIO: PA6=TRIG, PA7=ECHO ----------- */
-void ultrasonic_gpio_init(void)
-{
-    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
-
-    // TRIG PA6 OUTPUT
-    GPIOA->MODER &= ~(3 << (6*2));
-    GPIOA->MODER |=  (1 << (6*2));
-
-    // ECHO PA7 INPUT
-    GPIOA->MODER &= ~(3 << (7*2));
-}
-
-void trigger_pulse(void)
-{
-    GPIOA->ODR &= ~(1<<6);
-
-    for(volatile int i=0;i<10;i++);
-
-    GPIOA->ODR |= (1<<6);
-
-    uint32_t start = DWT->CYCCNT;
-    uint32_t wait = (SYSCLK_HZ/1000000) * 10;
-    while((DWT->CYCCNT - start) < wait);
-
-    GPIOA->ODR &= ~(1<<6);
-}
-
-int32_t measure_echo_us(void)
-{
-    uint32_t timeout = micros() + 30000;
-
-    while(!(GPIOA->IDR & (1<<7)))
+    if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
     {
-        if(micros() > timeout) return -1;
+        if(!Is_First_Captured)
+        {
+            IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+            __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_FALLING);
+            Is_First_Captured = 1;
+        }
+        else
+        {
+            IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+            uint32_t diff = IC_Val2-IC_Val1;
+
+            Distance = diff*0.034/2;
+            Is_First_Captured = 0;
+
+            __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_RISING);
+
+            HAL_TIM_IC_Stop_IT(&htim2,TIM_CHANNEL_1);
+        }
     }
-
-    uint32_t start = micros();
-
-    while(GPIOA->IDR & (1<<7))
-    {
-        if(micros() - start > 30000) return -2;
-    }
-
-    return (micros() - start);
 }
 
-void itoa_dec(uint32_t v, char *buf)
+void Flash_Write(uint32_t data)
 {
-    char tmp[10];
-    int p=0;
-    if(v==0){buf[0]='0';buf[1]=0;return;}
-    while(v){ tmp[p++] = (v%10)+'0'; v/=10; }
-    for(int i=0;i<p;i++) buf[i] = tmp[p-1-i];
-    buf[p] = 0;
+    HAL_FLASH_Unlock();
+
+    FLASH_EraseInitTypeDef EraseInitStruct;
+    uint32_t PageError = 0;
+
+    EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+    EraseInitStruct.Page        = 255;     // (0x080E0000)
+    EraseInitStruct.NbPages     = 1;
+
+    HAL_FLASHEx_Erase(&EraseInitStruct, &PageError);
+
+    uint64_t d = data;
+    HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, FLASH_ADDR, d);
+
+    HAL_FLASH_Lock();
 }
 
 int main(void)
 {
-    Clock_HSI_Enable();        // **** VERY IMPORTANT ****
-    uart2_gpio_init();
-    uart2_init();
-    dwt_init();
-    ultrasonic_gpio_init();
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    MX_USART2_UART_Init();
+    MX_TIM2_Init();
 
-    uart2_print("Starting Ultrasonic...\r\n");
-
-    char buf[16];
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
 
     while(1)
     {
-        trigger_pulse();
-        int32_t us = measure_echo_us();
+        HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,GPIO_PIN_SET);
+        delay(10);
+        HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,GPIO_PIN_RESET);
 
-        if(us > 0)
-        {
-            itoa_dec(us, buf);
-            uart2_print(buf);
-            uart2_print(" us\r\n");
-        }
-        else
-        {
-            uart2_print("Timeout\r\n");
-        }
+        HAL_Delay(100);
 
-        for(volatile int i=0;i<200000;i++);
+        Flash_Write(Distance);
+
+        char msg[50];
+        sprintf(msg,"Distance = %lu cm\r\n",Distance);
+        HAL_UART_Transmit(&huart2,(uint8_t*)msg,strlen(msg),100);
     }
 }

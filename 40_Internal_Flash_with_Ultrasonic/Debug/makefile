@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := 39_Ultrasonic_test_Baremetal
+BUILD_ARTIFACT_NAME := 40_Internal_Flash_with_Ultrasonic
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-39_Ultrasonic_test_Baremetal.elf \
+40_Internal_Flash_with_Ultrasonic.elf \
 
 MAP_FILES += \
-39_Ultrasonic_test_Baremetal.map \
+40_Internal_Flash_with_Ultrasonic.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-39_Ultrasonic_test_Baremetal.list \
+40_Internal_Flash_with_Ultrasonic.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: 39_Ultrasonic_test_Baremetal.elf secondary-outputs
+main-build: 40_Internal_Flash_with_Ultrasonic.elf secondary-outputs
 
 # Tool invocations
-39_Ultrasonic_test_Baremetal.elf 39_Ultrasonic_test_Baremetal.map: $(OBJS) $(USER_OBJS) D:\BITSILICA_WORKSHEETS\STM32L476RG\39_Ultrasonic_test_Baremetal\STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "39_Ultrasonic_test_Baremetal.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\39_Ultrasonic_test_Baremetal\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="39_Ultrasonic_test_Baremetal.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+40_Internal_Flash_with_Ultrasonic.elf 40_Internal_Flash_with_Ultrasonic.map: $(OBJS) $(USER_OBJS) D:\BITSILICA_WORKSHEETS\STM32L476RG\40_Internal_Flash_with_Ultrasonic\STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "40_Internal_Flash_with_Ultrasonic.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\BITSILICA_WORKSHEETS\STM32L476RG\40_Internal_Flash_with_Ultrasonic\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="40_Internal_Flash_with_Ultrasonic.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-39_Ultrasonic_test_Baremetal.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "39_Ultrasonic_test_Baremetal.list"
+40_Internal_Flash_with_Ultrasonic.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "40_Internal_Flash_with_Ultrasonic.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) 39_Ultrasonic_test_Baremetal.elf 39_Ultrasonic_test_Baremetal.list 39_Ultrasonic_test_Baremetal.map default.size.stdout
+	-$(RM) 40_Internal_Flash_with_Ultrasonic.elf 40_Internal_Flash_with_Ultrasonic.list 40_Internal_Flash_with_Ultrasonic.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
